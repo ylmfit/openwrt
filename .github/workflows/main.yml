@@ -1,0 +1,4655 @@
+＃SPDX-License-Identifier：GPL-2.0 +
+＃
+＃（C）版权所有2000-2013
+＃Wolfgang Denk，DENX软件工程，wd @ denx.de。
+
+概要：
+========
+
+此目录包含U-Boot的源代码，U-Boot是用于
+基于PowerPC，ARM，MIPS和其他几种嵌入式板
+处理器，可以安装在引导ROM中并用于
+初始化和测试硬件或下载并运行应用程序
+码。
+
+U-Boot的开发与Linux密切相关：
+源代码起源于Linux源代码树，我们有一些
+头文件是相同的，并且对
+支持引导Linux映像。
+
+为了使此软件易于使用，已经进行了一些注意
+可配置和可扩展。例如，所有监视器命令都是
+使用相同的调用接口实现，因此很容易
+添加新命令。此外，与其永久添加很少使用的内容
+代码（例如硬件测试实用程序）添加到监视器，您可以
+加载并动态运行。
+
+
+状态：
+=======
+
+通常，所有具有配置选项的主板
+Makefile已经过某种程度的测试，可以考虑
+“加工”。实际上，其中许多用于生产系统。
+
+如有问题，请参阅CHANGELOG文件以查找谁做出了贡献
+特定端口。此外，还有各种MAINTAINERS文件
+分散在整个U-Boot来源中，以识别人员或
+负责各种董事会和子系统的公司。
+
+注意：自2010年8月起，该版本中不再有CHANGELOG文件。
+实际的U-Boot源树; 但是，它可以动态创建
+从Git日志中使用：
+
+	进行CHANGELOG
+
+
+在哪里获得帮助：
+==================
+
+如果您有任何疑问，疑问或贡献
+U-Boot，您应该在以下位置向U-Boot邮件列表发送消息
+<u-boot@lists.denx.de>。还有以前的流量档案
+在邮件列表上-请在询问常见问题之前搜索档案。
+请参阅http://lists.denx.de/pipermail/u-boot和
+http://dir.gmane.org/gmane.comp.boot-loaders.u-boot
+
+
+在哪里获取源代码：
+========================
+
+U-Boot源代码在以下位置的Git存储库中维护：
+git：// www.denx.de/git/u-boot.git ; 您可以在http://www.denx.de/cgi-bin/gitweb.cgi?p=u-boot.git;a=summary在线浏览它
+
+
+通过此页面上的“快照”链接，您可以下载以下文件的压缩文件
+您可能感兴趣的任何版本。官方版本也
+可从ftp://ftp.denx.de/pub/u-boot/下载FTP
+目录。
+
+可以从以下位置获取预构建（和经过测试）的图像
+ftp://ftp.denx.de/pub/u-boot/images/
+
+
+我们来自哪里：
+===================
+
+-从8xxrom来源开始
+-创建PPCBoot项目（http://sourceforge.net/projects/ppcboot）
+-清理代码
+-使添加自定义板更加容易
+-可以添加其他[PowerPC] CPU
+-扩展功能，尤其是：
+  *提供扩展的Linux引导加载程序接口
+  * S-Record下载
+  * 网络启动
+  * ATA磁盘/ SCSI ...启动
+-创建ARMBoot项目（http://sourceforge.net/projects/armboot）
+-添加其他CPU系列（从ARM开始）
+-创建U-Boot项目（http://sourceforge.net/projects/u-boot）
+-当前项目页面：请参见http://www.denx.de/wiki/U-Boot
+
+
+名称和拼写：
+===================
+
+该项目的“正式”名称是“ Das U-Boot”。拼写
+所有书面文字均应使用“ U-Boot”（文档，注释
+在源文件等中）。例：
+
+	这是U-Boot项目的README文件。
+
+文件名等应基于字符串“ u-boot”。例子：
+
+	包括/ asm-ppc / u-boot.h
+
+	#include <asm / u-boot.h>
+
+变量名称，预处理器常量等应基于
+字符串“ u_boot”或“ U_BOOT”上。例：
+
+	U_BOOT_VERSION u_boot_logo
+	IH_OS_U_BOOT u_boot_hush_start
+
+
+版本控制：
+===========
+
+从2008年10月的版本开始，这些版本的名称
+从数字发布号更改而没有更深的含义
+到基于时间戳的编号。常规发行版由
+名称，包括发布日期的日历年和月份。
+其他字段（如果存在）指示候选发布或错误修复
+在“稳定的”维护树中发布。
+
+例子：
+	U-Boot v2009.11-2009年11月发布
+	U-Boot v2009.11.1-2009年11月版稳定树中的版本1
+	U-Boot v2010.09-rc1-2010年9月版本的候选版本1
+
+
+目录层次结构：
+====================
+
+/ arch体系结构特定文件
+  / arc ARC架构通用文件
+  / arm ARM体系结构通用的文件
+  / m68k m68k架构通用的文件
+  / microblaze对microblaze体系结构通用的文件
+  / mips MIPS架构通用的文件
+  / nds32 NDS32体系结构通用文件
+  / nios2 Altera NIOS2架构通用的文件
+  / openrisc OpenRISC架构通用的文件
+  / powerpc PowerPC体系结构通用的文件
+  / riscv RISC-V体系结构通用的文件
+  / sandbox与硬件无关的“ sandbox”通用的文件
+  / sh SH体系结构通用的文件
+  / x86 x86体系结构通用的文件
+/ api适用于外部应用程序的与机器/架构无关的API
+/ board依赖于板的文件
+/ cmd U-Boot命令功能
+/ common杂项架构独立功能
+/ configs板默认配置文件
+/ disk磁盘驱动器分区处理的代码
+/ doc文档（不要期望太多）
+/ drivers常用的设备驱动程序
+/ dts包含用于生成内部U-Boot fdt的Makefile。
+/ examples独立应用程序等的示例代码
+/ fs文件系统代码（cramfs，ext2，jffs2等）
+/ include头文件
+/ lib对所有体系结构通用的库例程
+/许可证各种许可证文件
+/ net联网代码
+/开机自检
+/ scripts各种构建脚本和Makefile
+/ test各种单元测试文件
+/ tools用于构建S-Record或U-Boot映像等的工具。
+
+软件配置：
+=======================
+
+配置通常使用C预处理程序定义来完成；的
+其基本原理是尽可能避免死代码。
+
+有两类配置变量：
+
+*配置_OPTIONS_：
+  这些可由用户选择，并且名称以
+  “ CONFIG_”。
+
+*配置_SETTINGS_：
+  这些取决于硬件等，如果
+  你不知道自己在做什么；他们的名字以
+  “ CONFIG_SYS_”。
+
+以前，所有配置都是手动完成的，其中包括创建
+符号链接和手动编辑配置文件。最近，
+U-Boot添加了Linux内核使用的Kbuild基础架构，
+允许您使用“ make menuconfig”命令来配置您的
+建立。
+
+
+处理器架构和板类型的选择：
+-------------------------------------------------- --
+
+对于所有受支持的板，都有现成的默认设置
+可用的配置；只需键入“ make <board_name> _defconfig”。
+
+示例：对于TQM823L模块类型：
+
+	光盘u-boot
+	制作TQM823L_defconfig
+
+注意：如果您正在寻找主板的默认配置文件
+您确定曾经在那里但现在不见了，请检查文件
+doc / README.scrapyard获取不再受支持的板的列表。
+
+沙盒环境：
+--------------------
+
+可以使用“沙盒”本地构建U-Boot以在Linux主机上运行
+板。这允许功能开发不是板级或架构级的
+具体在本机平台上进行。沙箱还用于
+运行一些U-Boot的测试。
+
+有关更多详细信息，请参见doc / arch / index.rst。
+
+
+电路板初始化流程：
+--------------------------
+
+这是电路板的预期启动流程。这应同时适用于
+SPL和U-Boot正确（即它们都遵循相同的规则）。
+
+注意：“ SPL”代表“辅助程序加载程序”，在
+此文件后面的更多详细信息。
+
+目前，SPL大多使用单独的代码路径，但函数名称
+每个功能的作用都相同 一些主板或架构
+可能与此不符。至少大多数使用
+CONFIG_SPL_FRAMEWORK符合此要求。
+
+执行通常从特定于架构的（可能是
+CPU特定的）start.S文件，例如：
+
+	-arch / arm / cpu / armv7 / start.S
+	-arch / powerpc / cpu / mpc83xx / start.S
+	-arch / mips / cpu / start.S
+
+等等。从那里开始，调用了三个函数。目的和
+这些功能的局限性在下面描述。
+
+lowlevel_init（）：
+	-目的：允许执行到达board_init_f（）的基本初始化
+	-没有global_data或BSS
+	-没有堆栈（ARMv7可能有一个堆栈，但是很快就会被删除）
+	-不得设置SDRAM或使用控制台
+	-必须只做最低限度的工作，才能继续执行
+		board_init_f（）
+	-几乎不需要
+	-从此函数正常返回
+
+board_init_f（）：
+	-目的：设置机器以准备运行board_init_r（）：
+		即SDRAM和串行UART
+	-global_data可用
+	-堆栈位于SRAM中
+	-BSS不可用，因此您不能使用全局/静态变量，
+		仅堆栈变量和global_data
+
+	非SPL特定说明：
+	-调用dram_init（）设置DRAM。如果已经在SPL中完成此操作
+		无能为力
+
+	SPL特定说明：
+	-您可以使用自己的函数覆盖整个board_init_f（）函数
+		需要的版本。
+	-preloader_console_init（）可以在极端中调用
+	-应该设置SDRAM，以及使UART工作所需的任何东西
+	-无需清除BSS，将由crt0.S完成
+	-对于某些架构上的特定方案，早期的BSS *可以*
+	  可以通过移动清除来通过CONFIG_SPL_EARLY_BSS
+	  在输入board_init_f（）之前，先不要对BSS进行任何设置，但不建议这样做。
+	  相反，强烈建议构建任何代码更改
+	  或不依赖于BSS可用性的添加
+	  如本自述文件的其他部分所述，board_init_f（）
+	  在整个代码库中保持兼容性和一致性。
+	-必须从此函数正常返回（不要调用board_init_r（）
+		直）
+
+此处清除了BSS。对于SPL，如果定义了CONFIG_SPL_STACK_R，则在
+此时，堆栈和global_data都移到了下面
+CONFIG_SPL_STACK_R_ADDR。对于非SPL，U-Boot已重定位以在以下位置运行
+记忆。
+
+board_init_r（）：
+	-目的：主要执行，通用代码
+	-global_data可用
+	-SDRAM可用
+	-BSS可用，可以使用所有静态/全局变量
+	-执行最终继续到main_loop（）
+
+	非SPL特定说明：
+	-U-Boot重定位到内存顶部，并且现在从
+		那里。
+
+	SPL特定说明：
+	-如果定义了CONFIG_SPL_STACK_R且堆栈可选地位于SDRAM中
+		CONFIG_SPL_STACK_R_ADDR指向SDRAM
+	-在这里可以调用preloader_console_init（）-通常是
+		通过选择CONFIG_SPL_BOARD_INIT然后提供一个
+		包含此调用的spl_board_init（）函数
+	-加载U-Boot或（以falcon模式）Linux
+
+
+
+配置选项：
+----------------------
+
+配置取决于板卡和CPU类型的组合。所有
+此类信息保存在配置文件中
+“ include / configs / <board_name> .h”。
+
+示例：对于TQM823L模块，所有配置设置都在
+“包括/配置/TQM823L.h”。
+
+
+许多选项的名称与相应的Linux完全相同
+内核配置选项。目的是使其更容易
+构建配置工具-稍后。
+
+-ARM平台总线类型（CCI）：
+		CoreLink高速缓存一致性互连（CCI）是ARM BUS，它
+		在两个多核群集之间提供完全的缓存一致性
+		设备和I / O主站的CPU和I / O一致性
+
+		CONFIG_SYS_FSL_HAS_CCI400
+
+		定义用于具有缓存一致性互连的SoC
+		CCN-400
+
+		CONFIG_SYS_FSL_HAS_CCN504
+
+		为具有高速缓存一致性互连CCN-504的SoC定义
+
+需要配置以下选项：
+
+-CPU类型：精确定义一个，例如CONFIG_MPC85XX。
+
+-电路板类型：精确定义一个，例如CONFIG_MPC8540ADS。
+
+-85xx CPU选项：
+		CONFIG_SYS_PPC64
+
+		指定核心是64位PowerPC实现（实现
+		Power ISA的“ 64”类别）。这对于ePAPR是必需的
+		合规性以及其他可能的原因。
+
+		CONFIG_SYS_FSL_TBCLK_DIV
+
+		定义与时基相比的核心时基时钟分频比
+		系统时钟。在大多数PQ3设备上为8，在较新的QorIQ上为8
+		器件可以是16或32。比率从SoC到Soc不等。
+
+		CONFIG_SYS_FSL_PCIE_COMPAT
+
+		定义尝试匹配PCIe设备时要使用的字符串
+		给定平台的树节点。
+
+		CONFIG_SYS_FSL_ERRATUM_A004510
+
+		为erratum A004510启用解决方法。如果设置，
+		然后CONFIG_SYS_FSL_ERRATUM_A004510_SVR_REV和
+		必须设置CONFIG_SYS_FSL_CORENET_SNOOPVEC_COREONLY。
+
+		CONFIG_SYS_FSL_ERRATUM_A004510_SVR_REV
+		CONFIG_SYS_FSL_ERRATUM_A004510_SVR_REV2（可选）
+
+		定义一或两个SoC版本（SVR的低8位）
+		为此，应采用A004510的解决方法。
+
+		SVR的其余部分与该决定无关
+		是否存在勘误（例如，p2040与
+		p2041）或构建目标所隐含，
+		是否设置了CONFIG_SYS_FSL_ERRATUM_A004510。
+
+		有关更多信息，请参见飞思卡尔应用笔记4493
+		这个错误。
+
+		CONFIG_A003399_NOR_WORKAROUND
+		启用IFC勘误A003399的解决方法。只有
+		NOR启动过程中需要。
+
+		CONFIG_A008044_WORKAROUND
+		为T1040 / T1042勘误表A008044启用解决方法。只有
+		在NAND引导期间必需，并且对Rev 1.0 SoC修订版有效
+
+		CONFIG_SYS_FSL_CORENET_SNOOPVEC_COREONLY
+
+		这是要写入CCSR偏移量0x18600的值
+		根据A004510的解决方法。
+
+		CONFIG_SYS_FSL_DSP_DDR_ADDR
+		此值表示DDR内存的起始偏移量，即
+		仅连接到DSP内核。
+
+		CONFIG_SYS_FSL_DSP_M2_RAM_ADDR
+		该值表示M2存储器的起始偏移量
+		直接连接到DSP内核。
+
+		CONFIG_SYS_FSL_DSP_M3_RAM_ADDR
+		该值表示M3存储器的起始偏移量，直接
+		连接到DSP内核。
+
+		CONFIG_SYS_FSL_DSP_CCSRBAR_DEFAULT
+		该值表示DSP CCSR空间的起始偏移量。
+
+		CONFIG_SYS_FSL_SINGLE_SOURCE_CLK
+		单源时钟是某些FSL SoC中的时钟模式。
+		在此模式下，单个差分时钟用于提供
+		时钟到sysclock，ddrclock和usbclock。
+
+		CONFIG_SYS_CPC_REINIT_F
+		在将CPC设置为SRAM时定义此CONFIG。
+		U-Boot进入时间，并且需要重新初始化。
+
+		CONFIG_DEEP_SLEEP
+		表示该SoC支持深度睡眠功能。如果深睡
+		受支持时，内核将在唤醒时开始执行uboot。
+
+-通用CPU选项：
+		CONFIG_SYS_BIG_ENDIAN，CONFIG_SYS_LITTLE_ENDIAN
+
+		定义CPU的字节序。那些实施
+		值是特定于拱的。
+
+		CONFIG_SYS_FSL_DDR
+		飞思卡尔DDR驱动程序正在使用中。这类DDR控制器是
+		可在mpc83xx，mpc85xx，mpc86xx以及某些ARM内核中找到
+		SoC。
+
+		CONFIG_SYS_FSL_DDR_ADDR
+		飞思卡尔DDR内存映射寄存器基。
+
+		CONFIG_SYS_FSL_DDR_EMU
+		指定对DDR的仿真器支持。某些DDR功能，例如
+		不提供去歪斜训练。
+
+		CONFIG_SYS_FSL_DDRC_GEN1
+		飞思卡尔DDR1控制器。
+
+		CONFIG_SYS_FSL_DDRC_GEN2
+		飞思卡尔DDR2控制器。
+
+		CONFIG_SYS_FSL_DDRC_GEN3
+		飞思卡尔DDR3控制器。
+
+		CONFIG_SYS_FSL_DDRC_GEN4
+		飞思卡尔DDR4控制器。
+
+		CONFIG_SYS_FSL_DDRC_ARM_GEN3
+		适用于基于ARM的SoC的飞思卡尔DDR3控制器。
+
+		CONFIG_SYS_FSL_DDR1
+		板配置以使用DDR1。可以为具有以下功能的SoC启用它
+		飞思卡尔DDR1或DDR2控制器，取决于板子
+		实现。
+
+		CONFIG_SYS_FSL_DDR2
+		板配置以使用DDR2。可以为具有以下功能的SoC启用它
+		飞思卡尔DDR2或DDR3控制器，取决于板子
+		实施。
+
+		CONFIG_SYS_FSL_DDR3
+		板配置以使用DDR3。可以为具有以下功能的SoC启用它
+		飞思卡尔DDR3或DDR3L控制器。
+
+		CONFIG_SYS_FSL_DDR3L
+		板配置以使用DDR3L。可以为具有以下功能的SoC启用它
+		DDR3L控制器。
+
+		CONFIG_SYS_FSL_DDR4
+		板配置以使用DDR4。可以为具有以下功能的SoC启用它
+		DDR4控制器。
+
+		CONFIG_SYS_FSL_IFC_BE
+		将IFC控制器寄存器空间定义为Big Endian
+
+		CONFIG_SYS_FSL_IFC_LE
+		将IFC控制器寄存器空间定义为Little Endian
+
+		CONFIG_SYS_FSL_IFC_CLK_DIV
+		定义平台时钟的分频器（IFC控制器的时钟输入）。
+
+		CONFIG_SYS_FSL_LBC_CLK_DIV
+		定义平台时钟的分频器（输入到eLBC控制器的时钟）。
+
+		CONFIG_SYS_FSL_PBL_PBI
+		它允许在内置映像中添加RCW（开机重置配置）。
+		请参阅doc / README.pblimage了解更多详细信息
+
+		CONFIG_SYS_FSL_PBL_RCW
+		它在u-boot构建映像中添加了PBI（预引导说明）命令。
+		在开始执行之前，可以使用PBI命令配置SoC。
+		请参阅doc / README.pblimage了解更多详细信息
+
+		CONFIG_SYS_FSL_DDR_BE
+		将DDR控制器寄存器空间定义为Big Endian
+
+		CONFIG_SYS_FSL_DDR_LE
+		将DDR控制器寄存器空间定义为Little Endian
+
+		CONFIG_SYS_FSL_DDR_SDRAM_BASE_PHY
+		从DDR控制器的角度来看的物理地址。它是
+		与所有Power SoC的CONFIG_SYS_DDR_SDRAM_BASE相同。但
+		对于ARM SoC，可能有所不同。
+
+		CONFIG_SYS_FSL_DDR_INTLV_256B
+		DDR控制器以256字节交织。这很特别
+		交错模式，由狄更斯（Dickens）处理，用于Freescale layerscape
+		具有ARM内核的SoC。
+
+		CONFIG_SYS_FSL_DDR_MAIN_NUM_CTRLS
+		用作主存储器的控制器数量。
+
+		CONFIG_SYS_FSL_OTHER_DDR_NUM_CTRLS
+		除主内存外用于其他控制器的数量。
+
+		CONFIG_SYS_FSL_HAS_DP_DDR
+		定义SoC具有用于DPAA的DP-DDR。
+
+		CONFIG_SYS_FSL_SEC_BE
+		将SEC控制器寄存器空间定义为Big Endian
+
+		CONFIG_SYS_FSL_SEC_LE
+		将SEC控制器寄存器空间定义为Little Endian
+
+-MIPS CPU选项：
+		CONFIG_SYS_INIT_SP_OFFSET
+
+		初始堆栈相对于CONFIG_SYS_SDRAM_BASE的偏移量
+		指针。这是临时堆栈之前需要的
+		搬迁。
+
+		CONFIG_XWAY_SWAP_BYTES
+
+		启用Lantiq所需的工具/ xway交换字节的编译
+		用于从NOR闪存引导的XWAY SoC。U-Boot映像需要
+		如果使用Flash编程器，则可以交换。
+
+-ARM选项：
+		CONFIG_SYS_EXCEPTION_VECTORS_HIGH
+
+		选择ARM内核的高异常向量，例如，不要
+		清除CP15的c1寄存器的V位。
+
+		COUNTER_FREQUENCY
+		通用定时器时钟源频率。
+
+		COUNTER_FREQUENCY_REAL
+		通用计时器时钟源频率（如果实际时钟为
+		与COUNTER_FREQUENCY不同，只能确定
+		在运行时。
+
+-Tegra SoC选项：
+		CONFIG_TEGRA_SUPPORT_NON_SECURE
+
+		支持以非安全（NS）模式执行U-Boot。某些
+		如果CPU处于NS模式，则将跳过无法执行的操作，
+		例如ARM体系结构计时器初始化。
+
+-Linux内核接口：
+		CONFIG_MEMSIZE_IN_BYTES [仅与MIPS相关]
+
+		将memsize参数传输到Linux时，某些版本
+		期望它以字节为单位，其他以MB为单位。
+		定义CONFIG_MEMSIZE_IN_BYTES以字节为单位。
+
+		CONFIG_OF_LIBFDT
+
+		新的内核版本期望固件设置为
+		使用扁平化的设备树传递（基于开放式固件）
+		概念）。
+
+		CONFIG_OF_LIBFDT
+		 *新的基于libfdt的支持
+		 *添加“ fdt”命令
+		 * bootm命令自动更新fdt
+
+		OF_TBCLK-时基频率。
+		OF_STDOUT_PATH-控制台设备的路径
+
+		配备QUICC引擎的主板需要OF_QE来设置UCC MAC
+		地址
+
+		CONFIG_OF_BOARD_SETUP
+
+		董事会代码具有要修改的其他内容
+		到平面设备树之前，将其移交给内核
+
+		CONFIG_OF_SYSTEM_SETUP
+
+		其他代码具有要修改的内容
+		移交给内核之前，先将其移至平面设备树。
+		这导致在启动之前调用ft_system_setup（）
+		内核。
+
+		CONFIG_OF_IDE_FIXUP
+
+		U-Boot可以检测是否存在IDE设备。
+		如果没有，并且这个新的配置选项被激活，U-Boot
+		在启动Linux之前，从DTS中删除ATA节点，
+		因此Linux IDE驱动程序不会探测设备，并且
+		崩溃。越野车硬件（uc101）需要此功能，其中
+		没有下拉电阻连接到信号IDE5V_DD7。
+
+		CONFIG_MACH_TYPE [仅与ARM相关] [强制性]
+
+		对于只有一个板的所有板，此设置是必需的
+		机器类型，必须用于指定机器类型
+		显示在ARM机器注册表中的数字
+		（请参阅http://www.arm.linux.org.uk/developer/machines/）。
+		仅支持多种机器类型的主板
+		在一个配置文件中，机器类型为
+		运行时可发现的，不必使用此设置。
+
+-vxWorks启动参数：
+
+		bootvx使用以下命令构造有效的引导线
+		环境变量：bootdev，bootfile，ipaddr，netmask，
+		serverip，gatewayip，主机名，othbootargs。
+		它会加载vxWorks映像指向的引导文件。
+
+		注意：如果定义了“ bootargs”环境，它将覆盖
+		上面讨论的默认值。
+
+-缓存配置：
+		CONFIG_SYS_L2CACHE_OFF-不要在U-Boot中启用L2缓存
+
+-ARM的缓存配置：
+		CONFIG_SYS_L2_PL310-启用对ARM PL310 L2缓存的支持
+				      控制者
+		CONFIG_SYS_PL310_BASE-PL310的物理基址
+					控制器寄存器空间
+
+-串口：
+		CONFIG_PL010_SERIAL
+
+		如果要支持Amba PrimeCell PL010 UART，请定义此选项。
+
+		CONFIG_PL011_SERIAL
+
+		如果要支持Amba PrimeCell PL011 UART，请定义此选项。
+
+		CONFIG_PL011_CLOCK
+
+		如果您有Amba PrimeCell PL011 UART，请将此变量设置为
+		UART的时钟速度。
+
+		CONFIG_PL01x_PORTS
+
+		如果板上有Amba PrimeCell PL010或PL011 UART，
+		将其定义为每个（支持）的基址列表
+		港口。参见例如include / configs / versatile.h
+
+		CONFIG_SERIAL_HW_FLOW_CONTROL
+
+		定义此变量以在串行驱动程序中启用硬件流控制。
+		该选项的当前用户是drivers / serial / nsl16550.c驱动程序
+
+-自动启动命令：
+		CONFIG_BOOTCOMMAND
+		仅在启用CONFIG_BOOTDELAY时才需要；
+		定义一个自动执行的命令字符串
+		在控制台界面上未读取任何字符时
+		复位后在“启动延迟”内。
+
+		CONFIG_RAMBOOT和CONFIG_NFSBOOT
+		这些的价值进入环境
+		可以分别使用“ ramboot”和“ nfsboot”
+		为了方便起见，在从
+		RAM和NFS。
+
+-串行下载回显模式：
+		CONFIG_LOADS_ECHO
+		如果定义为1，则在
+		串行下载（使用“ loads”命令）是
+		回响。某些终端可能需要
+		模拟（如“ cu”），但也可以
+		在别人身上的时间。#define是初始设置
+		环境变量“ loads_echo”的值。
+
+-Kgdb串行波特率：（如果定义了CONFIG_CMD_KGDB）
+		CONFIG_KGDB_BAUDRATE
+		选择列出的波特率之一
+		CONFIG_SYS_BAUDRATE_TABLE，请参见下文。
+
+-删除命令
+		如果不需要引导命令，则可以禁用
+		CONFIG_CMDLINE删除它们。在这种情况下，命令行
+		将不可用，并且当U-Boot要执行
+		引导命令（启动时）将调用board_run_command（）
+		代替。这样可以极大地减小图像尺寸
+		简单的启动过程。
+
+-正则表达式支持：
+		CONFIG_REGEX
+		如果定义了此变量，则U-Boot将链接到
+		SLRE（超轻型正则表达式）库，
+		像这样为某些命令添加了正则表达式支持
+		例如“ env grep”和“ setexpr”。
+
+-设备树：
+		CONFIG_OF_CONTROL
+		如果定义了此变量，U-Boot将使用设备树
+		配置其设备，而不是静态依赖
+		在板文件中编译#define。这个选项是
+		实验性的，仅在少数板上可用。装置
+		该树在全局数据中可用gd-> fdt_blob。
+
+		U-Boot需要从某处获取其设备树。这个可以
+		使用以下三个选项之一完成操作：
+
+		CONFIG_OF_EMBED
+		如果定义了此变量，U-Boot将嵌入设备树
+		图像中的二进制。该设备树文件应位于
+		板目录并称为<soc>-<board> .dts。二进制文件
+		然后在board_init_f（）中拾取并通过
+		全局数据结构为gd-> fdt_blob。
+
+		CONFIG_OF_SEPARATE
+		如果定义了此变量，U-Boot将建立一个设备树
+		二进制 它将被称为u-boot.dtb。特定于架构
+		代码将在运行时找到它。通常，这通过以下方式起作用：
+
+			猫u-boot.bin u-boot.dtb> image.bin
+
+		实际上，U-Boot为您完成了此任务，创建了一个名为
+		u-boot-dtb.bin在通常情况下很有用。您可以
+		如果您还需要其他文件，请仍然使用单个文件
+		异国情调。
+
+		CONFIG_OF_BOARD
+		如果定义了此变量，U-Boot将使用设备树
+		由董事会在运行时提供，而不是将其与
+		图片。仅定义board_fdt_blob_setup（）的电路板支持
+		此选项（请参阅include / fdtdec.h文件）。
+
+-看门狗：
+		CONFIG_WATCHDOG
+		如果定义了此变量，则启用看门狗
+		支持SoC。SoC中必须有支持
+		看门狗的特定代码。对于8xx
+		CPU，在SYPCR中启用了SIU看门狗功能
+		寄存器。当支持特定的SoC时
+		可用，那么就不应该再有其他董事会专用代码了
+		需要使用它。
+
+		CONFIG_HW_WATCHDOG
+		使用外部使用的看门狗电路时
+		SoC，然后定义此变量并提供电路板
+		“ hw_watchdog_reset”功能的特定代码。
+
+- 实时时钟：
+
+		选择CONFIG_CMD_DATE时，RTC的类型
+		也必须选择。准确定义其中之一
+		以下选项：
+
+		CONFIG_RTC_PCF8563-使用飞利浦PCF8563 RTC
+		CONFIG_RTC_MC13XXX-使用MC13783或MC13892 RTC
+		CONFIG_RTC_MC146818-使用MC146818 RTC
+		CONFIG_RTC_DS1307-使用Maxim，Inc.DS1307 RTC
+		CONFIG_RTC_DS1337-使用Maxim，Inc.DS1337 RTC
+		CONFIG_RTC_DS1338-使用Maxim，Inc.DS1338 RTC
+		CONFIG_RTC_DS1339-使用Maxim，Inc.DS1339 RTC
+		CONFIG_RTC_DS164x-使用Dallas DS164x RTC
+		CONFIG_RTC_ISL1208-使用Intersil ISL1208 RTC
+		CONFIG_RTC_MAX6900-使用Maxim，Inc.MAX6900 RTC
+		CONFIG_RTC_DS1337_NOOSC-关闭DS1337的OSC输出
+		CONFIG_SYS_RV3029_TCR-启用trick流充电器
+					  RV3029 RTC。
+
+		请注意，如果RTC使用I2C，则I2C接口
+		必须配置。请参阅下面的I2C支持。
+
+-GPIO支持：
+		CONFIG_PCA953X-使用NXP的PCA953X系列I2C GPIO
+
+		CONFIG_SYS_I2C_PCA953X_WIDTH选项指定以下内容的列表
+		告诉PCA953X驱动程序的芯片-ngpio对的数量
+		特定芯片支持的引脚。
+
+		请注意，如果GPIO设备使用I2C，则I2C接口
+		必须配置。请参阅下面的I2C支持。
+
+-I / O追踪：
+		选择CONFIG_IO_TRACE时，U-Boot拦截所有I / O
+		访问并可以对它们进行校验和或将其写出
+		记忆。有关详细信息，请参见“ iotrace”命令。这是
+		对于测试设备驱动程序很有用，因为它可以确认
+		驱动程序在代码前后的行为方式相同
+		更改。目前，沙盒和手臂支持此功能。至
+		添加对您的体系结构的支持，添加“ #include <iotrace.h>”
+		到arch / <arch> /include/asm/io.h的底部并进行测试。
+
+		下面是“ iotrace stats”命令的示例输出。
+		请注意，如果跟踪缓冲区已用尽，则校验和将
+		仍继续运行。
+
+			iotrace已启用
+			起始：10000000（缓冲区起始地址）
+			大小：00010000（缓冲区大小）
+			偏移量：00000120（当前缓冲区偏移量）
+			输出：10000120（开始+偏移）
+			计数：00000018（跟踪记录数）
+			CRC32：9526fb66（所有追踪记录的CRC32）
+
+-时间戳支持：
+
+		选择CONFIG_TIMESTAMP时，时间戳记
+		图像的（日期和时间）按图像打印
+		像bootm或iminfo这样的命令。这个选项是
+		选择CONFIG_CMD_DATE时自动启用。
+
+-支持的分区标签（disklabel）：
+		零个或多个以下内容：
+		CONFIG_MAC_PARTITION苹果的MacOS分区表。
+		CONFIG_ISO_PARTITION ISO分区表，用于CDROM等
+		CONFIG_EFI_PARTITION GPT分区表，在EFI为
+				       引导程序。注意2TB分区限制；看到
+				       磁盘/part_efi.c
+		CONFIG_SCSI），您必须在以下位置配置对
+		以及至少一种非MTD分区类型。
+
+-IDE重置方法：
+		CONFIG_IDE_RESET_ROUTINE-在几个中定义
+		板配置文件，但无处使用！
+
+		CONFIG_IDE_RESET-如果已定义，IDE重置将
+		通过调用函数来执行
+			ide_set_reset（int重置）
+		必须在董事会专用文件中定义
+
+-ATAPI支持：
+		配置文件
+
+		设置此项以启用ATAPI支持。
+
+-LBA48支持
+		配置文件
+
+		设置此项以启用对大于137GB的磁盘的支持
+		另请参阅CONFIG_SYS_64BIT_LBA。
+		如果没有这些，LBA48支持使用32位变量，并且将“仅”
+		支持高达2.1TB的磁盘。
+
+		CONFIG_SYS_64BIT_LBA：
+			启用后，使IDE子系统使用64位扇区地址。
+			默认值为32位。
+
+-SCSI支持：
+		CONFIG_SYS_SCSI_MAX_LUN [8]，CONFIG_SYS_SCSI_MAX_SCSI_ID [7]和
+		CONFIG_SYS_SCSI_MAX_DEVICE [CONFIG_SYS_SCSI_MAX_SCSI_ID *
+		可以调整CONFIG_SYS_SCSI_MAX_LUN]来定义
+		LUN，SCSI ID和目标的最大数量
+		设备。
+
+		环境变量“ scsidevs”设置为
+		在上次扫描期间找到的SCSI设备。
+
+-网络支持（PCI）：
+		配置文件
+		支持Intel 8254x / 8257x千兆芯片。
+
+		CONFIG_E1000_SPI
+		用于直接访问Intel 8257x上SPI总线的实用程序代码。
+		除非您至少设置一个，否则此操作无济于事
+		CONFIG_CMD_E1000或CONFIG_E1000_SPI_GENERIC
+
+		CONFIG_E1000_SPI_GENERIC
+		允许通用访问Intel 8257x上的SPI总线，用于
+		“ sspi”命令的示例。
+
+		配置_NATSEMI
+		支持国家dp83815芯片。
+
+		CONFIG_NS8382X
+		支持National dp8382 [01]千兆芯片。
+
+-网络支持（其他）：
+
+		CONFIG_DRIVER_AT91EMAC
+		支持AT91RM9200 EMAC。
+
+			配置文件
+			定义它以使用简化的MII接口
+
+			CONFIG_DRIVER_AT91EMAC_QUIET
+			如果已定义，则驱动程序处于安静状态。
+			驱动程序不显示链接状态消息。
+
+		CONFIG_CALXEDA_XGMAC
+		支持Calxeda XGMAC设备
+
+		配置文件
+		支持SMSC的LAN91C96芯片。
+
+			CONFIG_LAN91C96_USE_32_BIT
+			定义此项以启用32位寻址
+
+		配置文件
+		支持SMSC的LAN91C111芯片
+
+			CONFIG_SMC91111_BASE
+			定义它来保存物理地址
+			设备的数量（I / O空间）
+
+			CONFIG_SMC_USE_32_BIT
+			如果数据总线为32位，则定义此
+
+			CONFIG_SMC_USE_IOFUNCS
+			定义它以使用I / O函数而不是宏
+			（某些硬件无法与宏一起使用）
+
+			CONFIG_SYS_DAVINCI_EMAC_PHY_COUNT
+			如果您有3个以上的PHY，请定义此字段。
+
+		配置_FTGMAC100
+		支持法拉第的FTGMAC100千兆位SoC以太网
+
+			CONFIG_FTGMAC100_EGIGA
+			定义它以使用千兆链路PHY的GE链接更新。
+			如果FTGMAC100连接到千兆位PHY，请定义此选项。
+			如果您的系统仅具有10/100 PHY，则可能不会发生
+			错误的行为。因为PHY通常会返回超时或
+			轮询千兆位状态和千兆位时无用的数据
+			控制寄存器。此行为不会影响
+			10/100链接速度更新的正确性。
+
+		CONFIG_SH_ETHER
+		支持瑞萨电子片上以太网控制器
+
+			CONFIG_SH_ETHER_USE_PORT
+			定义要使用的端口数
+
+			CONFIG_SH_ETHER_PHY_ADDR
+			定义ETH PHY的地址
+
+			CONFIG_SH_ETHER_CACHE_WRITEBACK
+			如果设置此选项，则驱动程序将启用缓存刷新。
+
+-TPM支持：
+		配置文件
+		支持TPM设备。
+
+		CONFIG_TPM_TIS_INFINEON
+		支持Infineon i2c总线TPM设备。仅一台设备
+		目前支持每个系统。
+
+			CONFIG_TPM_TIS_I2C_BURST_LIMITATION
+			定义突发计数字节上限
+
+		CONFIG_TPM_ST33ZP24
+		支持意法半导体TPM器件。需要DM_TPM支持。
+
+			CONFIG_TPM_ST33ZP24_I2C
+			支持意法半导体ST33ZP24 I2C器件。
+			需要TPM_ST33ZP24和I2C。
+
+			CONFIG_TPM_ST33ZP24_SPI
+			支持STMicroelectronics ST33ZP24 SPI器件。
+			需要TPM_ST33ZP24和SPI。
+
+		CONFIG_TPM_ATMEL_TWI
+		支持Atmel TWI TPM设备。需要I2C支持。
+
+		CONFIG_TPM_TIS_LPC
+		支持通用并行端口TPM设备。仅一台设备
+		目前支持每个系统。
+
+			CONFIG_TPM_TIS_BASE_ADDRESS
+			通用TPM设备映射到的基址
+			至。当代的x86系统通常将其映射到
+			0xfed40000。
+
+		配置文件
+		定义此选项以启用TPM支持库，该库提供
+		一些TPM命令的功能接口。
+		需要对TPM设备的支持。
+
+		CONFIG_TPM_AUTH_SESSIONS
+		定义它以启用TPM库中的授权功能。
+		需要CONFIG_TPM和CONFIG_SHA1。
+
+-USB支持：
+		目前只有UHCI主控制器是
+		支持（PIP405，MIP405）；定义
+		CONFIG_USB_UHCI以启用它。
+		定义CONFIG_USB_KEYBOARD以启用USB键盘
+		并定义CONFIG_USB_STORAGE以启用USB
+		存储设备。
+		注意：
+		支持USB键盘和USB软盘驱动器
+		（TEAC FD-05PUB）。
+
+		CONFIG_USB_EHCI_TXFIFO_THRESH启用设置
+		重置时，EHCI控制器中的txfilltuning字段。
+
+		CONFIG_USB_DWC2_REG_ADDR DWC2的物理CPU地址
+		硬件模块寄存器。
+
+-USB设备：
+		如果要使用USB控制台，请定义以下内容。
+		从串行控制台重建固件后，发出
+		命令“ setenv stdin usbtty； setenv stdout usbtty”和
+		连接USB电缆。Unix命令“ dmesg”应打印
+		它找到了一个新设备。环境变量usbtty
+		可以设置为gserial或cdc_acm以使您的设备能够
+		在USB主机上显示为Linux gserial设备或
+		通用设备类抽象控制模型串行设备。
+		如果选择usbtty = gserial，则应该可以枚举
+		Linux主机
+		＃modprobe USB供应商= 0xVendorID产品= 0xProductID
+		否则，如果使用cdc_acm，只需设置环境
+		变量usbtty为cdc_acm应该足够了。以下
+		可能在YourBoardName.h中定义
+
+			CONFIG_USB_DEVICE
+			定义此内容以构建UDC设备
+
+			CONFIG_USB_TTY
+			定义它以使tty设备类型可用于
+			与UDC设备通话
+
+			CONFIG_USBD_HS
+			定义此项以启用对USB的高速支持
+			设备和usbtty。如果启用此功能，则例程
+			int is_usbd_high_speed（void）
+			还需要由驱动程序定义以动态轮询
+			枚举是成功的还是高速的
+			速度。
+
+			CONFIG_SYS_CONSOLE_IS_IN_ENV
+			如果要让stdin，stdout和/或stderr进行定义
+			设置为usbtty。
+
+		如果您为USB-IF分配了VendorID，那么您可能希望
+		在BoardName.h中定义您自己的供应商特定值
+		或直接在usbd_vendor_info.h中。如果你不定义
+		CONFIG_USBD_MANUFACTURER，CONFIG_USBD_PRODUCT_NAME，
+		CONFIG_USBD_VENDORID和CONFIG_USBD_PRODUCTID，然后使用U-Boot
+		应该假装为目标主机的Linux设备。
+
+			CONFIG_USBD_MANUFACTURER
+			将此字符串定义为您的公司名称
+			-CONFIG_USBD_MANUFACTURER“我的公司”
+
+			CONFIG_USBD_PRODUCT_NAME
+			将此字符串定义为您的产品名称
+			-CONFIG_USBD_PRODUCT_NAME“ acme USB设备”
+
+			CONFIG_USBD_VENDORID
+			通过USB将其定义为您分配的供应商ID
+			实施者论坛。*必须为真实的供应商ID
+			避免污染USB名称空间。
+			-CONFIG_USBD_VENDORID 0xFFFF
+
+			CONFIG_USBD_PRODUCTID
+			将其定义为唯一的产品ID
+			为您的设备
+			-CONFIG_USBD_PRODUCTID 0xFFFF
+
+-ULPI层支持：
+		可通过以下方式支持ULPI（UTMI低引脚（计数）接口）PHY
+		通用ULPI层。通用层访问ULPI PHY
+		通过平台视口，因此您需要通用层和
+		视口已启用。目前仅基于Chipidea / ARC
+		支持视口。
+		要启用ULPI层支持，请定义CONFIG_USB_ULPI和
+		板配置文件中的CONFIG_USB_ULPI_VIEWPORT。
+		如果您的ULPI phy需要的参考时钟与
+		标准24 MHz，则必须将CONFIG_ULPI_REF_CLK定义为
+		以Hz为单位的适当值。
+
+-MMC支持：
+		支持Intel PXA上的MMC控制器。至
+		启用此定义CONFIG_MMC。MMC可以是
+		通过映射设备从引导提示符访问
+		类似于闪存的物理内存。命令行是
+		使用CONFIG_CMD_MMC启用。MMC驱动程序还可以与
+		FAT文件。这是通过CONFIG_CMD_FAT启用的。
+
+		CONFIG_SH_MMCIF
+		支持瑞萨电子片上MMCIF控制器
+
+			CONFIG_SH_MMCIF_ADDR
+			定义MMCIF寄存器的基地址
+
+			CONFIG_SH_MMCIF_CLK
+			定义MMCIF的时钟频率
+
+-USB设备固件更新（DFU）类支持：
+		CONFIG_DFU_OVER_USB
+		这将启用DFU USB类的USB部分
+
+		CONFIG_DFU_NAND
+		这样就可以支持通过DFU公开NAND设备。
+
+		配置文件
+		这样可以支持通过DFU公开RAM。
+		注意：DFU规范指的是非易失性内存的使用，但是
+		允许超出规范范围的使用-这里是RAM使用情况，
+		一种将主要帮助开发人员的工具。
+
+		CONFIG_SYS_DFU_DATA_BUF_SIZE
+		Dfu传输先使用缓冲区，然后再将数据写入到
+		原始存储设备。设置此缓冲区的大小（以字节为单位）
+		可配置的。该缓冲区的大小也是可配置的
+		通过“ dfu_bufsiz”环境变量。
+
+		CONFIG_SYS_DFU_MAX_FILE_SIZE
+		当更新文件而不是原始存储设备时，
+		我们使用静态缓冲区将文件复制到其中，然后写入
+		一旦我们获得了整个文件，就将其作为缓冲区。定义
+		这是缓冲区的最大文件大小（以字节为单位）。
+		如果未定义，默认值为4 MiB。
+
+		DFU_DEFAULT_POLL_TIMEOUT
+		轮询超时[ms]，是设备可以发送给设备的超时时间
+		主办。主机必须等待此超时后才能发送
+		向设备的后续DFU_GET_STATUS请求。
+
+		DFU_MANIFEST_POLL_TIMEOUT
+		轮询超时[ms]，设备在发送到主机时会发送给主机
+		进入dfuMANIFEST状态。主机在等待此超时之前
+		再次向设备发送USB请求。
+
+-日记Flash文件系统支持：
+		CONFIG_JFFS2_NAND
+		为NAND设备上的默认分区定义这些
+
+		CONFIG_SYS_JFFS2_FIRST_SECTOR，
+		CONFIG_SYS_JFFS2_FIRST_BANK，CONFIG_SYS_JFFS2_NUM_BANKS
+		为NOR设备上的默认分区定义这些
+
+-键盘支持：
+		有关可用的键盘驱动程序，请参见Kconfig帮助。
+
+		配置键盘
+
+		定义此选项可启用自定义键盘支持。
+		这只是调用drv_keyboard_init（），必须
+		在您的主板专用文件中定义。此选项已弃用
+		并且仅由novena使用。对于新板，请使用驱动程序模型
+		代替。
+
+-视频支持：
+		CONFIG_FSL_DIU_FB
+		启用飞思卡尔DIU视频驱动程序。参考板
+		具有DIU的SOC应该定义此宏以启用DIU
+		支持，并且还应该定义以下其他宏：
+
+			CONFIG_SYS_DIU_ADDR
+			配置视频
+			CONFIG_CFB_CONSOLE
+			CONFIG_VIDEO_SW_CURSOR
+			CONFIG_VGA_AS_SINGLE_DEVICE
+			CONFIG_VIDEO_LOGO
+			CONFIG_VIDEO_BMP_LOGO
+
+		DIU驱动程序将寻找“视频模式”环境
+		变量，如果已定义，则在以下情况下将DIU用作控制台
+		开机。请参阅文档文件doc / README.video以获取有关
+		此变量的说明。
+
+-LCD支持：CONFIG_LCD
+
+		定义此选项以启用LCD支持（用于输出到LCD
+		显示）; 同时选择一种支持的显示
+		通过定义以下之一：
+
+		CONFIG_ATMEL_LCD：
+
+			日立TX09D70VM1CCA，3.5英寸，240x320
+
+		CONFIG_NEC_NL6448AC33：
+
+			NEC NL6448AC33-18。主动，彩色，单次扫描。
+
+		CONFIG_NEC_NL6448BC20
+
+			NEC NL6448BC20-08。6.5英寸，640x480。
+			主动，彩色，单次扫描。
+
+		CONFIG_NEC_NL6448BC33_54
+
+			NEC NL6448BC33-54。10.4英寸，640x480。
+			主动，彩色，单次扫描。
+
+		CONFIG_SHARP_16x9
+
+			夏普320x240。主动，彩色，单次扫描。
+			它不是16x9，我不确定是什么。
+
+		CONFIG_SHARP_LQ64D341
+
+			夏普LQ64D341显示屏，640x480。
+			主动，彩色，单次扫描。
+
+		配置文件
+
+			HLD1045显示器，640x480。
+			主动，彩色，单次扫描。
+
+		CONFIG_OPTREX_BW
+
+			Optrex CBL50840-2 NF-FW 99 22 M5
+			要么
+			日立LMG6912RPFC-00T
+			要么
+			日立SP14Q002
+
+			320x240。黑，白。
+
+		CONFIG_LCD_ALIGNMENT
+
+		通常，LCD是页面对齐的（通常为4KB）。如果这是
+		定义后，LCD将改为与此值对齐。
+		对于ARM，有时使用MMU_SECTION_SIZE很有用
+		在这里，因为更改数据缓存设置更便宜
+		每部分的基础。
+
+
+		CONFIG_LCD_ROTATION
+
+		有时，例如，如果显示器是纵向安装
+		模式，或者即使已安装横向但旋转了180度，
+		我们需要相对于
+		帧缓冲区，以便用户可以读取
+		打印出来。
+		定义CONFIG_LCD_ROTATION后，lcd_console将为
+		使用来自“ vl_rot”的给定旋转初始化
+		董事会特定代码提供的“ vidinfo_t”。
+		vl_rot的值编码如下（与
+		fbcon = rotate：<n> linux-kernel命令行）：
+		0 =分别不旋转0度
+		1 = 90度旋转
+		2 = 180度旋转
+		3 = 270度旋转
+
+		如果未定义CONFIG_LCD_ROTATION，则控制台为
+		初始化为0度旋转。
+
+		CONFIG_LCD_BMP_RLE8
+
+		支持在LCD上绘制RLE8压缩的位图。
+
+		CONFIG_I2C_EDID
+
+		启用可以读取EDID的“ i2c edid”命令
+		通过附带的LCD显示屏通过I2C获得信息。
+
+-Gzip压缩的BMP图像支持：CONFIG_VIDEO_BMP_GZIP
+
+		如果设置了此选项，则除标准BMP外
+		图像，压缩的BMP图像可以通过
+		初始屏幕支持或bmp命令。
+
+-运行长度编码的BMP映像（RLE8）支持：CONFIG_VIDEO_BMP_RLE8
+
+		如果设置此选项，则为8位RLE压缩的BMP图像
+		可以通过启动画面支持或
+		bmp命令。
+
+-MII / PHY支持：
+		CONFIG_PHY_CLOCK_FREQ（ppc4xx）
+
+		MII总线的时钟频率
+
+		CONFIG_PHY_RESET_DELAY
+
+		诸如Intel LXT971A的某些PHY需要经过额外的延迟
+		在可以访问任何MII寄存器之前复位。
+		对于此类PHY，将此选项设置为usec delay
+		需要。（LXT971A最少300usec）
+
+		CONFIG_PHY_CMD_DELAY（ppc4xx）
+
+		诸如Intel LXT971A的某些PHY需要经过额外的延迟
+		在读取MII状态寄存器之前发出的命令
+
+- IP地址：
+		配置文件
+
+		定义要用于的IP地址的默认值
+		默认的以太网接口（如果不是）
+		通过例如bootp确定。
+		（环境变量“ ipaddr”）
+
+- 服务器的IP地址：
+		配置服务器IP
+
+		定义TFTP IP地址的默认值
+		使用“ tftboot”命令时要联系的服务器。
+		（环境变量“ serverip”）
+
+		CONFIG_KEEP_SERVERADDR
+
+		将服务器的MAC地址保留在env'serveraddr'中
+		用于传递给bootargs（例如Linux的netconsole选项）
+
+-网关IP地址：
+		CONFIG_GATEWAYIP
+
+		定义IP地址的默认值
+		到其他网络的数据包所在的默认路由器
+		送至。
+		（环境变量“ gatewayip”）
+
+- 子网掩码：
+		配置文件
+
+		定义子网掩码的默认值（或
+		路由前缀），用于确定IP
+		地址属于本地子网或需要为
+		通过路由器转发。
+		（环境变量“ netmask”）
+
+-BOOTP恢复模式：
+		CONFIG_BOOTP_RANDOM_DELAY
+
+		如果您的网络中有许多目标，
+		使用BOOTP启动，您可能要避免所有
+		系统以完全相同的方式发送BOOTP请求
+		瞬间（例如在恢复时会发生
+		停电时，所有系统都会尝试
+		启动，从而淹没BOOTP服务器。定义
+		CONFIG_BOOTP_RANDOM_DELAY导致随机延迟为
+		在发出BOOTP请求之前插入。的
+		然后插入以下延迟：
+
+		第一个BOOTP请求：延迟0 ... 1秒
+		第2个BOOTP请求：延迟0 ... 2秒
+		第三个BOOTP请求：延迟0 ... 4秒
+		第四及以下
+		BOOTP请求：延迟0 ... 8秒
+
+		CONFIG_BOOTP_ID_CACHE_SIZE
+
+		BOOTP数据包使用32位ID唯一标识。的
+		服务器会将ID从客户端请求复制到响应，然后
+		U-Boot将使用它来确定它是否是目的地
+		传入的响应。一些服务器会检查该地址
+		在分发之前不使用（通常使用ARP）
+		ping），因此最多可能需要几百毫秒
+		响应。网络拥塞也可能会影响时间
+		做出回应以将其返回给客户端。如果说
+		时间过长，U-Boot将重新发送请求。为了
+		在这些之后，仍可以接受较早的响应
+		重新传输后，U-Boot的BOOTP客户端会保留少量
+		ID。CONFIG_BOOTP_ID_CACHE_SIZE控制此文件的大小
+		缓存。默认设置是保留最多四个未处理的ID
+		要求。增加此数量将使U-Boot接受报价
+		从具有异常高延迟的网络中的BOOTP客户端访问。
+
+-DHCP高级选项：
+		您可以通过定义DHCP功能来微调DHCP功能。
+		CONFIG_BOOTP_ *符号：
+
+		CONFIG_BOOTP_NISDOMAIN
+		CONFIG_BOOTP_BOOTFILESIZE
+		CONFIG_BOOTP_NTPSERVER
+		CONFIG_BOOTP_TIMEOFFSET
+		CONFIG_BOOTP_VENDOREX
+		CONFIG_BOOTP_MAY_FAIL
+
+		CONFIG_BOOTP_SERVERIP-TFTP服务器将成为serverip
+		环境变量，而不是BOOTP服务器。
+
+		CONFIG_BOOTP_MAY_FAIL-如果找不到DHCP服务器
+		配置重试次数后，呼叫将失败
+		而不是重新开始。这可以用来进行故障转移
+		如果是DHCP服务器，则链接到本地​​链接IP地址配置
+		不可用。
+
+		CONFIG_BOOTP_DHCP_REQUEST_DELAY
+
+		一个32位值（以微秒为单位）之间的延迟
+		接收“ DHCP提供”并发送“ DHCP请求”。
+		这解决了某些DHCP服务器没有的问题
+		100％的时间响应“ DHCP请求”。例如在
+		AT91RM9200处理器以180MHz运行，需要此延迟
+		Windows Server 2003之前*至少* 15,000个使用
+		DHCP服务器将100％的时间答复。我建议在
+		至少有50,000个使用安全性。另一种是希望
+		重试之一将成功，但请注意
+		DHCP超时和重试过程花费的时间比
+		这个延迟。
+
+ -链路本地IP地址协商：
+		与本地网络上的其他本地链接客户端进行协商
+		不需要显式配置的地址。
+		如果无法保证DHCP服务器，此功能特别有用
+		在设备必须运行的所有环境中都存在。
+
+		有关更多信息，请参见doc / README.link-local。
+
+ -来自环境变量的MAC地址
+
+		FDT_SEQ_MACADDR_FROM_ENV
+
+		修复设备树，其中MAC地址从以下顺序获取
+		环境变量。此配置基于以下假设进行工作：
+		设备树的不可用以太网节点不存在
+		或其状态已标记为“已禁用”。
+
+ -CDP选项：
+		CONFIG_CDP_DEVICE_ID
+
+		CDP触发帧中使用的设备ID。
+
+		CONFIG_CDP_DEVICE_ID_PREFIX
+
+		以MAC地址为前缀的两个字符串
+		设备的
+
+		CONFIG_CDP_PORT_ID
+
+		一个printf格式字符串，其中包含的ascii名称
+		港口。通常设置为“ eth％d”
+		eth0用于第一个以太网，eth1用于第二个，以此类推。
+
+		CONFIG_CDP_CAPABILITIES
+
+		一个32位整数，指示设备的功能；
+		对于不转发的普通主机，为0x00000010。
+
+		CONFIG_CDP_VERSION
+
+		包含软件版本的ascii字符串。
+
+		CONFIG_CDP_PLATFORM
+
+		包含平台名称的ascii字符串。
+
+		CONFIG_CDP_TRIGGER
+
+		在触发器上发送的32位整数。
+
+		CONFIG_CDP_POWER_CONSUMPTION
+
+		一个16位整数，其中包含
+		设备以0.1毫瓦为单位。
+
+		CONFIG_CDP_APPLIANCE_VLAN_TYPE
+
+		包含VLAN ID的字节。
+
+-状态LED：CONFIG_LED_STATUS
+
+		几种配置可以显示当前
+		使用LED的状态。例如，LED将闪烁
+		运行U-Boot代码时速度很快，停止闪烁为
+		收到对BOOTP请求的答复后，并且
+		Linux内核运行后，开始缓慢闪烁
+		（由Linux中的状态LED驱动程序支持
+		核心）。定义CONFIG_LED_STATUS可启用此功能
+		U-Boot中的功能。
+
+		其他选项：
+
+		CONFIG_LED_STATUS_GPIO
+		状态LED可以连接到GPIO引脚。
+		在这种情况下，可以将gpio_led驱动程序用作
+		状态LED后端实现。定义CONFIG_LED_STATUS_GPIO
+		在U-Boot二进制文件中包含gpio_led驱动程序。
+
+		CONFIG_GPIO_LED_INVERTED_TABLE
+		某些GPIO连接的LED的极性可能相反
+		如果GPIO高值对应于LED熄灭状态且
+		GPIO低值对应于LED点亮状态。
+		在这种情况下，可以定义CONFIG_GPIO_LED_INVERTED_TABLE
+		带有极性反转的GPIO LED列表。
+
+-I2C支持：CONFIG_SYS_I2C
+
+		这将启用NEW i2c子系统，并允许您使用
+		u-boot命令行上的i2c命令（只要您设置
+		    CONFIG_SYS_I2C_SOFT_SPEED和CONFIG_SYS_I2C_SOFT_SLAVE
+		    用于定义速度和从站地址
+		  -使用I2C_SOFT_DECLARATIONS2定义激活第二条总线
+		    CONFIG_SYS_I2C_SOFT_SPEED_2和CONFIG_SYS_I2C_SOFT_SLAVE_2
+		    用于定义速度和从站地址
+		  -使用I2C_SOFT_DECLARATIONS3定义激活第三条总线
+		    CONFIG_SYS_I2C_SOFT_SPEED_3和CONFIG_SYS_I2C_SOFT_SLAVE_3
+		    用于定义速度和从站地址
+		  -使用I2C_SOFT_DECLARATIONS4定义激活第四条总线
+		    CONFIG_SYS_I2C_SOFT_SPEED_4和CONFIG_SYS_I2C_SOFT_SLAVE_4
+		    用于定义速度和从站地址
+
+		-drivers / i2c / fsl_i2c.c：
+		  -使用CONFIG_SYS_I2C_FSL激活i2c驱动程序
+		    定义CONFIG_SYS_FSL_I2C_OFFSET以设置寄存器
+		    i2c速度的偏移CONFIG_SYS_FSL_I2C_SPEED和
+		    CONFIG_SYS_FSL_I2C_SLAVE用于第一个从属地址
+		    总线。
+		  -如果您的主板支持第二条fsl i2c总线，请定义
+		    CONFIG_SYS_FSL_I2C2_OFFSET用于寄存器偏移
+		    CONFIG_SYS_FSL_I2C2_SPEED表示速度和
+		    CONFIG_SYS_FSL_I2C2_SLAVE为主机的从机地址
+		    第二辆公共汽车。
+
+		-drivers / i2c / tegra_i2c.c：
+		  -使用CONFIG_SYS_I2C_TEGRA激活此驱动程序
+		  -此驱动程序添加了4个i2c总线，其固定速度为
+		    100000和从属地址0！
+
+		-驱动程序/i2c/ppc4xx_i2c.c
+		  -使用CONFIG_SYS_I2C_PPC4XX激活该驱动程序
+		  -CONFIG_SYS_I2C_PPC4XX_CH0激活硬件通道0
+		  -CONFIG_SYS_I2C_PPC4XX_CH1激活硬件通道1
+
+		-驱动程序/i2c/i2c_mxc.c
+		  -使用CONFIG_SYS_I2C_MXC激活该驱动程序
+		  -使用CONFIG_SYS_I2C_MXC_I2C1启用总线1
+		  -使用CONFIG_SYS_I2C_MXC_I2C2启用总线2
+		  -使用CONFIG_SYS_I2C_MXC_I2C3启用总线3
+		  -使用CONFIG_SYS_I2C_MXC_I2C4启用总线4
+		  -使用CONFIG_SYS_MXC_I2C1_SPEED定义总线1的速度
+		  -使用CONFIG_SYS_MXC_I2C1_SLAVE为总线1定义从站
+		  -使用CONFIG_SYS_MXC_I2C2_SPEED定义总线2的速度
+		  -使用CONFIG_SYS_MXC_I2C2_SLAVE为总线2定义从站
+		  -使用CONFIG_SYS_MXC_I2C3_SPEED定义总线3的速度
+		  -使用CONFIG_SYS_MXC_I2C3_SLAVE为总线3定义从站
+		  -使用CONFIG_SYS_MXC_I2C4_SPEED定义总线4的速度
+		  -使用CONFIG_SYS_MXC_I2C4_SLAVE为总线4定义从站
+		如果未设置这些定义，则默认值为100000
+		表示速度，0表示从属。
+
+		-drivers / i2c / rcar_i2c.c：
+		  -使用CONFIG_SYS_I2C_RCAR激活该驱动程序
+		  -该驱动程序增加了4条i2c总线
+
+		-drivers / i2c / sh_i2c.c：
+		  -使用CONFIG_SYS_I2C_SH激活该驱动程序
+		  -该驱动程序增加了2至5个i2c总线
+
+		  -CONFIG_SYS_I2C_SH_BASE0用于设置寄存器通道0
+		  -CONFIG_SYS_I2C_SH_SPEED0用于速度通道0
+		  -CONFIG_SYS_I2C_SH_BASE1用于设置寄存器通道1
+		  -CONFIG_SYS_I2C_SH_SPEED1用于速度通道1
+		  -CONFIG_SYS_I2C_SH_BASE2用于设置寄存器通道2
+		  -CONFIG_SYS_I2C_SH_SPEED2用于速度通道2
+		  -CONFIG_SYS_I2C_SH_BASE3用于设置寄存器通道3
+		  -用于速度通道3的CONFIG_SYS_I2C_SH_SPEED3
+		  -CONFIG_SYS_I2C_SH_BASE4用于设置寄存器通道4
+		  -用于速度通道4的CONFIG_SYS_I2C_SH_SPEED4
+		  -CONFIG_SYS_I2C_SH_NUM_CONTROLLERS用于i2c总线的数量
+
+		-驱动程序/i2c/omap24xx_i2c.c
+		  -使用CONFIG_SYS_I2C_OMAP24XX激活此驱动程序
+		  -CONFIG_SYS_OMAP24_I2C_SPEED速度通道0
+		  -CONFIG_SYS_OMAP24_I2C_SLAVE从站地址0
+		  -CONFIG_SYS_OMAP24_I2C_SPEED1速度通道1
+		  -CONFIG_SYS_OMAP24_I2C_SLAVE1从属地址通道1
+		  -CONFIG_SYS_OMAP24_I2C_SPEED2速度通道2
+		  -CONFIG_SYS_OMAP24_I2C_SLAVE2从站地址2
+		  -CONFIG_SYS_OMAP24_I2C_SPEED3速度通道3
+		  -CONFIG_SYS_OMAP24_I2C_SLAVE3从属地址3
+		  -CONFIG_SYS_OMAP24_I2C_SPEED4速度通道4
+		  -CONFIG_SYS_OMAP24_I2C_SLAVE4从设备地址4
+
+		-驱动程序/i2c/s3c24x0_i2c.c：
+		  -使用CONFIG_SYS_I2C_S3C24X0激活该驱动程序
+		  -此驱动程序添加了i2c总线（Exynos5250，Exynos5420为11
+		    9个用于Exynos4的i2c总线和1个用于三星的S3C24X0 SoC的总线
+		    固定速度为100000，从属地址为0！
+
+		-驱动程序/i2c/ihs_i2c.c
+		  -使用CONFIG_SYS_I2C_IHS激活此驱动程序
+		  -CONFIG_SYS_I2C_IHS_CH0激活硬件通道0
+		  -CONFIG_SYS_I2C_IHS_SPEED_0速度通道0
+		  -CONFIG_SYS_I2C_IHS_SLAVE_0从站地址0
+		  -CONFIG_SYS_I2C_IHS_CH1激活硬件通道1
+		  -CONFIG_SYS_I2C_IHS_SPEED_1速度通道1
+		  -CONFIG_SYS_I2C_IHS_SLAVE_1从站地址1
+		  -CONFIG_SYS_I2C_IHS_CH2激活硬件通道2
+		  -CONFIG_SYS_I2C_IHS_SPEED_2速度通道2
+		  -CONFIG_SYS_I2C_IHS_SLAVE_2从站地址2
+		  -CONFIG_SYS_I2C_IHS_CH3激活硬件通道3
+		  -CONFIG_SYS_I2C_IHS_SPEED_3速度通道3
+		  -CONFIG_SYS_I2C_IHS_SLAVE_3从属地址3
+		  -使用CONFIG_SYS_I2C_IHS_DUAL激活双通道
+		  -CONFIG_SYS_I2C_IHS_SPEED_0_1速度通道0_1
+		  -CONFIG_SYS_I2C_IHS_SLAVE_0_1从站地址0_1
+		  -CONFIG_SYS_I2C_IHS_SPEED_1_1速度通道1_1
+		  -CONFIG_SYS_I2C_IHS_SLAVE_1_1从站地址1_1
+		  -CONFIG_SYS_I2C_IHS_SPEED_2_1速度通道2_1
+		  -CONFIG_SYS_I2C_IHS_SLAVE_2_1从站地址2_1
+		  -CONFIG_SYS_I2C_IHS_SPEED_3_1速度通道3_1
+		  -CONFIG_SYS_I2C_IHS_SLAVE_3_1从站地址3_1
+
+		附加定义：
+
+		CONFIG_SYS_NUM_I2C_BUSES
+		保留要使用的i2c总线的数量。
+
+		CONFIG_SYS_I2C_DIRECT_BUS
+		如果您不在硬件上使用i2c多路复用器，请定义此定义。
+		如果未定义CONFIG_SYS_I2C_MAX_HOPS或== 0，则可以
+		忽略此定义。
+
+		CONFIG_SYS_I2C_MAX_HOPS
+		定义最大连续连接多少个多路复用器
+		在一辆i2c总线上。如果您不使用i2c复用器，请忽略此
+		定义。
+
+		CONFIG_SYS_I2C_BUSES
+		保留您要使用的公交车列表，仅在以下情况下使用
+		未定义CONFIG_SYS_I2C_DIRECT_BUS
+		一个CONFIG_SYS_I2C_MAX_HOPS = 1的电路板
+		CONFIG_SYS_NUM_I2C_BUSES = 9：
+
+		 CONFIG_SYS_I2C_BUSES {{0，{I2C_NULL_HOP}}，\
+					{0，{{I2C_MUX_PCA9547，0x70，1}}}，\
+					{0，{{I2C_MUX_PCA9547，0x70，2}}}，\
+					{0，{{I2C_MUX_PCA9547，0x70，3}}}，\
+					{0，{{I2C_MUX_PCA9547，0x70，4}}}，\
+					{0，{{I2C_MUX_PCA9547，0x70，5}}}，\
+					{1，{I2C_NULL_HOP}}，\
+					{1，{{I2C_MUX_PCA9544，0x72，1}}}，\
+					{1，{{I2C_MUX_PCA9544，0x72，2}}}，\
+					}
+
+		定义
+			没有多路复用器的适配器0上的总线0
+			适配器0上的总线1和地址0x70端口1上的PCA9547
+			适配器0上的总线2和地址0x70端口2上的PCA9547
+			适配器0上的总线3和地址0x70端口3上的PCA9547
+			适配器0上的总线4和地址0x70端口4上的PCA9547
+			适配器0上的总线5和地址0x70端口5上的PCA9547
+			没有多路复用器的适配器1上的总线6
+			适配器1上的总线7和地址0x72端口1上的PCA9544
+			适配器1上的总线8和地址0x72端口2上的PCA9544
+
+		如果板上没有i2c多路复用器，请忽略此定义。
+
+-旧版I2C支持：
+		如果您使用软件i2c接口（CONFIG_SYS_I2C_SOFT）
+		然后需要定义以下宏（例如
+		来自include / configs / lwmon.h）：
+
+		I2C_INIT
+
+		（可选的）。启用I2C所需的任何命令
+		控制器或配置端口。
+
+		例如：#define I2C_INIT（immr-> im_cpm.cp_pbdir | = PB_SCL）
+
+		I2C_ACTIVE
+
+		使I2C数据线激活所需的代码
+		（驱动）。如果数据线是集电极开路，这
+		define可以为null。
+
+		例如：#define I2C_ACTIVE（immr-> im_cpm.cp_pbdir | = PB_SDA）
+
+		I2C_TRISTATE
+
+		使I2C数据线处于三态的必要代码
+		（无效）。如果数据线是集电极开路，这
+		define可以为null。
+
+		例如：#define I2C_TRISTATE（immr-> im_cpm.cp_pbdir＆=〜PB_SDA）
+
+		I2C_READ
+
+		如果I2C数据线为高电平，则代码返回true，
+		如果为低，则为false。
+
+		例如：#define I2C_READ（（immr-> im_cpm.cp_pbdat＆PB_SDA）！= 0）
+
+		I2C_SDA（位）
+
+		如果<bit>为true，则将I2C数据线设置为高电平。如果它
+		为假，将其清除（低）。
+
+		例如：#define I2C_SDA（bit）\
+			if（bit）immr-> im_cpm.cp_pbdat | = PB_SDA; \
+			否则immr-> im_cpm.cp_pbdat＆=〜PB_SDA
+
+		I2C_SCL（位）
+
+		如果<bit>为true，则将I2C时钟线设置为高电平。如果它
+		为假，将其清除（低）。
+
+		例如：#define I2C_SCL（bit）\
+			if（bit）immr-> im_cpm.cp_pbdat | = PB_SCL; \
+			否则immr-> im_cpm.cp_pbdat＆=〜PB_SCL
+
+		I2C_DELAY
+
+		每个时钟周期调用此延迟四次，因此
+		控制数据传输速率。因此数据速率
+		是1 /（I2C_DELAY * 4）。通常定义为某物
+		喜欢：
+
+		＃定义I2C_DELAY udelay（2）
+
+		CONFIG_SOFT_I2C_GPIO_SCL / CONFIG_SOFT_I2C_GPIO_SDA
+
+		如果您的网桥支持通用GPIO框架（asm / gpio.h），
+		那么您可以选择定义两个GPIO
+		用作SCL / SDA。以前的任何I2C_xxx宏都会
+		已为它们分配了基于GPIO的默认值。
+
+		您应将它们定义为直接给的GPIO值
+		通用GPIO功能。
+
+		CONFIG_SYS_I2C_INIT_BOARD
+
+		在i2c总线传输过程中重置板卡时
+		筹码可能会认为当前的转移仍在
+		进行中。在某些板上可以访问
+		直接使用i2c SCLK线
+		处理器引脚作为GPIO或具有第二个引脚
+		连接到总线。如果定义了此选项
+		板/xxx/board.c中的自定义i2c_init_board（）例程
+		在启动顺序的早期运行。
+
+		CONFIG_I2C_MULTI_BUS
+
+		该选项允许使用多个I2C总线，每个总线
+		必须有一个控制器。在任何时间点，只有一辆公共汽车
+		活性。要切换到其他总线，请使用“ i2c dev”命令。
+		请注意，总线编号从零开始。
+
+		CONFIG_SYS_I2C_NOPROBES
+
+		此选项指定将被跳过的I2C设备列表
+		当发出“ i2c probe”命令时。如果CONFIG_I2C_MULTI_BUS
+		设置后，指定总线设备对的列表。否则，请指定
+		一维设备地址数组
+
+		例如
+			#undef CONFIG_I2C_MULTI_BUS
+			＃定义CONFIG_SYS_I2C_NOPROBES {0x50,0x68}
+
+		将在具有一个I2C总线的板上跳过地址0x50和0x68
+
+			＃定义CONFIG_I2C_MULTI_BUS
+			＃定义CONFIG_SYS_I2C_NOPROBES {{0,0x50}，{0,0x68}，{1,0x54}}
+
+		将跳过总线0上的地址0x50和0x68以及总线1上的地址0x54
+
+		CONFIG_SYS_SPD_BUS_NUM
+
+		如果定义，则表示DDR SPD的I2C总线号。
+		如果未定义，则U-Boot会假定SPD在I2C总线0上。
+
+		CONFIG_SYS_RTC_BUS_NUM
+
+		如果定义，则表示RTC的I2C总线号。
+		如果未定义，则U-Boot会假定RTC在I2C总线0上。
+
+		CONFIG_SOFT_I2C_READ_REPEATED_START
+
+		定义它会强制i2c_read（）函数
+		soft_i2c驱动程序以执行I2C重复启动
+		在写地址指针和读取地址之间
+		数据。如果省略此定义，则默认行为
+		将执行停止-启动顺序。大多数I2C
+		设备可以使用任何一种方法，但有些设备需要使用一种或
+		另一个。
+
+-SPI支持：CONFIG_SPI
+
+		启用S​​PI驱动程序（到目前为止仅通过
+		SPI EEPROM，也是与Crystal A / D和
+		D / A在SACSng板上）
+
+		CONFIG_SOFT_SPI
+
+		启用软件（位爆炸式）SPI驱动程序，而不是
+		使用硬件支持。这是通用的
+		仅需三个通用I / O端口引脚的驱动程序
+		（两个输出，一个输入）功能。如果这是
+		定义，板配置必须定义几个
+		SPI配置项（要使用的端口引脚等）。对于
+		有关示例，请参见include / configs / sacsng.h。
+
+		CONFIG_SYS_SPI_MXC_WAIT
+		等待spi传输完成的超时。
+		默认值：（CONFIG_SYS_HZ / 100）/ * 10毫秒* /
+
+-FPGA支持：CONFIG_FPGA
+
+		启用FPGA子系统。
+
+		CONFIG_FPGA_ <供应商>
+
+		支持特定的芯片供应商。
+		（赛灵思ALTERA）
+
+		CONFIG_FPGA_ <家庭>
+
+		启用对FPGA系列的支持。
+		（SPARTAN2，SPARTAN3，VIRTEX2，CYCLONE2，ACEX1K，ACEX）
+
+		CONFIG_FPGA_COUNT
+
+		指定要支持的FPGA设备的数量。
+
+		CONFIG_SYS_FPGA_PROG_FEEDBACK
+
+		在FPGA配置期间启用打印哈希标记。
+
+		CONFIG_SYS_FPGA_CHECK_BUSY
+
+		启用对FPGA配置接口繁忙的检查
+		状态通过配置功能。这个选项
+		将需要板或设备的特定功能
+		被写。
+
+		CONFIG_FPGA_DELAY
+
+		如果定义，则该功能可在FPGA中提供延迟
+		配置驱动程序。
+
+		CONFIG_SYS_FPGA_CHECK_CTRLC
+		允许Control-C中断FPGA配置
+
+		CONFIG_SYS_FPGA_CHECK_ERROR
+
+		在FPGA位文件期间检查配置错误
+		加载中。例如，在Virtex II中中止
+		如果INIT_B线变低（
+		表示CRC错误）。
+
+		CONFIG_SYS_FPGA_WAIT_INIT
+
+		等待INIT_B行取消断言的最长时间
+		在Virtex II中取消PROB_B的置位后
+		FPGA配置序列。默认时间是500
+		多发性硬化症。
+
+		CONFIG_SYS_FPGA_WAIT_BUSY
+
+		在此期间等待BUSY无效的最大时间
+		Virtex II FPGA配置。默认值为5毫秒。
+
+		CONFIG_SYS_FPGA_WAIT_CONFIG
+
+		FPGA配置后需要等待的时间。默认是
+		200毫秒
+
+- 配置管理：
+
+		CONFIG_IDENT_STRING
+
+		如果定义，该字符串将被添加到U-Boot
+		版本信息（U_BOOT_VERSION）
+
+-供应商参数保护：
+
+		U-Boot考虑环境的价值
+		变量“ serial＃”（面板序列号）和
+		“ ethaddr”（以太网地址）为以下参数
+		由董事会供应商/制造商设置一次，并且
+		保护这些变量免于随意修改
+		用户。设置后，这些变量是只读的，
+		并拒绝写入或删除尝试。您可以
+		更改此行为：
+
+		如果CONFIG_ENV_OVERWRITE在配置中已#defined
+		文件，供应商参数的写保护为
+		完全禁用。任何人都可以更改或删除
+		这些参数。
+
+		或者，如果您在_both_中定义ethaddr
+		默认env _and_ CONFIG_OVERWRITE_ETHADDR_ONCE，默认
+		环境中安装了以太网地址，
+		用户可以一次准确地更改。[
+		序列号不受此影响，即它保持不变
+		只读。]
+
+		同样可以更灵活地完成
+		通过配置访问类型来访问任何变量
+		允许在“ .flags”变量中使用这些变量
+		或定义CONFIG_ENV_FLAGS_LIST_STATIC。
+
+-受保护的RAM：
+		配置文件
+
+		定义此变量以启用保留
+		“受保护的RAM”，即未被覆盖的RAM
+		由U-Boot。定义CONFIG_PRAM来保存
+		您要为pRAM保留的KB。您可以覆盖
+		通过定义环境使用此默认值
+		将变量“ pram”设置为您想要的kB数
+		保留。请注意，董事会信息结构将
+		仍显示全部RAM。如果pRAM是
+		保留，新的环境变量“ mem”将
+		自动定义为保留金额
+		剩余的RAM以可以作为引导传递的形式
+		Linux的参数，例如：
+
+			setenv bootargs ... mem = \ $ {mem}
+			保存环境
+
+		这样，您可以告诉Linux不要使用此内存，
+		要么，这将导致一个内存区域
+		不受重启影响。
+
+		*警告*如果您的电路板配置使用自动
+		检测RAM大小时，必须确保
+		此内存测试是非破坏性的。到目前为止，
+		已知以下电路板配置为
+		“ pRAM-clean”：
+
+			IVMS8，IVML24，SPD8xx，
+			HERMES，IP860，RPXlite，LWMON，
+			FLAGADM
+
+-访问物理内存区域（> 4GB）
+		提供了一些基本的支持，以实现对内存的操作而不是
+		通常可由U-Boot访问-例如某些架构
+		支持在32位上访问超过4GB的内存
+		使用物理地址扩展名或类似地址的计算机。
+		定义CONFIG_PHYSMEM以访问此基本支持，该支持
+		当前仅支持清除内存。
+
+-错误恢复：
+		CONFIG_NET_RETRY_COUNT
+
+		此变量定义重试次数
+		网络操作，例如ARP，RARP，TFTP或BOOTP
+		放弃操作之前。如果未定义，
+		默认值为5。
+
+		CONFIG_ARP_TIMEOUT
+
+		等待ARP回复的超时时间（以毫秒为单位）。
+
+		CONFIG_NFS_TIMEOUT
+
+		NFS协议中使用的超时（以毫秒为单位）。
+		如果您在nfs命令中遇到“错误：无法卸载”，
+		尝试更长的超时时间，例如
+		＃定义CONFIG_NFS_TIMEOUT 10000UL
+
+-命令翻译：
+		CONFIG_SYS_PROMPT_HUSH_PS2
+
+		这定义了辅助提示字符串，即
+		当命令解释器需要更多输入时打印
+		完成命令。通常是“>”。
+
+	注意：
+
+		在当前的实现中，局部变量
+		空间和全局环境变量空间是
+		分开。局部变量是您定义的变量
+		只需输入“名称=值”即可。访问本地
+		稍后，您写了“ $ name”或
+		`$ {name}'; 执行变量的内容
+		在命令提示符下直接键入“ $ name”。
+
+		全局环境变量是您使用的那些
+		setenv / printenv一起使用。运行存储的命令
+		在这样的变量中，您需要使用run命令，
+		并且您不得使用“ $”符号来访问它们。
+
+		将命令和特殊字符存储在
+		变量，请使用双引号
+		包围变量的整个文本
+		分号和特殊字符前的反斜杠
+		符号。
+
+-命令行编辑和历史记录：
+		CONFIG_CMDLINE_PS_SUPPORT
+
+		启用对更改命令提示符字符串的支持
+		在运行时。到目前为止，仅支持静态字符串。
+		该字符串是从环境变量PS1获得的
+		和PS2。
+
+-默认环境：
+		CONFIG_EXTRA_ENV_SETTINGS
+
+		定义它以包含任意数量的空终止
+		将成为一部分的字符串（变量=值对）
+		默认环境编译到引导映像中。
+
+		例如，在您的
+		板的配置文件：
+
+		＃定义CONFIG_EXTRA_ENV_SETTINGS \
+			“ myvar1 = value1 \ 0” \
+			“ myvar2 = value2 \ 0”
+
+		警告：此方法基于有关
+		内部格式，环境如何存储
+		U引导代码。这不是官方的，已导出
+		接口！尽管这种格式不太可能
+		即将改变，也无法保证。
+		您最好知道您在这里做什么。
+
+		注意：过度（滥用）默认环境是
+		灰心。确保检查其他方式进行预设
+		环境，例如“源”命令或
+		首先启动命令。
+
+		CONFIG_DELAY_ENVIRONMENT
+
+		通常情况下，当板子处于
+		初始化，以便U-Boot可以使用。这抑制了
+		这样环境才可用
+		稍后由U-Boot代码显式加载。使用CONFIG_OF_CONTROL
+		而是由的值控制
+		/ config / load-environment。
+
+-TFTP固定UDP端口：
+		CONFIG_TFTP_PORT
+
+		如果已定义，则环境变量tftpsrcp
+		用于提供TFTP UDP源端口值。
+		如果未定义tftpsrcp，则为正常的伪随机端口
+		使用数字生成器。
+
+		此外，环境变量tftpdstp用于提供
+		TFTP UDP目标端口值。如果不是tftpdstp
+		在定义后，将使用普通端口69。
+
+		tftpsrcp的目的是允许TFTP服务器执行以下操作：
+		使用预配置盲目启动TFTP传输
+		目标IP地址和UDP端口。具有以下效果
+		“穿通”（Windows XP）防火墙，允许
+		TFTP转移的其余部分可以正常进行。
+		更好的解决方案是正确配置防火墙，
+		但是有时候那是不允许的。
+
+		CONFIG_STANDALONE_LOAD_ADDR
+
+		此选项为
+		加载独立程序的地址，因此
+		覆盖依赖于体系结构的默认值
+		设置。
+
+-帧缓冲区地址：
+		CONFIG_FB_ADDR
+
+		如果要使用特定的，请定义CONFIG_FB_ADDR
+		帧缓冲区的地址。通常是这种情况
+		使用图形控制器时有单独的视频
+		记忆。然后，U-Boot将帧缓冲区放置在
+		给定地址，而不是动态保留
+		通过调用lcd_setmem（）获取系统RAM中的内容
+		帧缓冲区的内存取决于
+		配置的面板尺寸。
+
+		请参阅board_init_f函数。
+
+-通过TFTP服务器自动更新软件
+		CONFIG_UPDATE_TFTP
+		CONFIG_UPDATE_TFTP_CNT_MAX
+		CONFIG_UPDATE_TFTP_MSEC_MAX
+
+		这些选项启用和控制自动更新功能。
+		有关更详细的描述，请参阅doc / README.update。
+
+-MTD支持（mtdparts命令，UBI支持）
+		CONFIG_MTD_UBI_WL_THRESHOLD
+		此参数定义了最高和最高
+		擦除计数器值和擦除块的最低擦除计数器值
+		UBI设备。超过此阈值时，UBI开始执行
+		通过以低擦除从擦除块中移动数据来实现磨损均衡
+		计数器与高擦除计数器的擦除块。
+
+		对于SLC NAND闪存，NOR闪存和
+		其他擦除块的生命周期为100000或更高的闪光灯。
+		但是，对于MLC NAND闪存，通常具有擦除块
+		生命周期小于10000，则应降低阈值（例如，
+		到128或256，尽管不一定必须是2的幂。
+
+		默认值：4096
+
+		CONFIG_MTD_UBI_BEB_LIMIT
+		此选项指定最大不良物理擦除块UBI
+		预期在MTD设备上（每1024个擦除块）。如果
+		底层闪存不允许不良的擦除块（例如，NOR
+		Flash），则忽略此值。
+
+		NAND数据表通常指定最小和最大NVM
+		（有效块数）表示闪光灯的使用寿命。
+		每1024个擦除块的最大预期不良擦除块
+		然后可以计算为“ 1024 *（1-MinNVB / MaxNVB）”，
+		这为大多数NAND提供了20个（MaxNVB基本上是总数
+		芯片上的擦除块数）。
+
+		换句话说，如果该值为20，UBI将尝试
+		为坏块保留大约1.9％的物理擦除块
+		处理。这将是整个擦除块的1.9％
+		NAND芯片，而不仅仅是UBI附加的MTD分区。这表示
+		如果您有一个NAND闪存芯片，则最多承认40个坏
+		擦除块，并在相同的两个MTD分区上拆分
+		大小时，UBI会在附加一个
+		划分。
+
+		默认值：20
+
+		CONFIG_MTD_UBI_FASTMAP
+		Fastmap是一种允许附加UBI设备的机制
+		在几乎恒定的时间内。而不是扫描整个MTD设备
+		只需在设备上找到检查点（称为快速映射）即可。
+		闪存快速映射包含附加所需的所有信息
+		装置。在大型设备上使用快速映射才有意义
+		通过扫描附加需要很长时间。UBI将不会自动安装
+		旧图像上的快速贴图，但是您可以设置UBI参数
+		如果需要，将CONFIG_MTD_UBI_FASTMAP_AUTOCONVERT设置为1。请注意
+		启用了快速贴图的图像仍可用于UBI实现
+		没有fastmap支持。在典型的闪存设备上，整个快速映射
+		适合一个PEB。UBI将保留PEB来保存两个快速映射。
+
+		CONFIG_MTD_UBI_FASTMAP_AUTOCONVERT
+		设置此参数以在图像上自动启用快速映射
+		没有快速地图。
+		默认值：0
+
+		CONFIG_MTD_UBI_FM_DEBUG
+		启用UBI快速地图调试
+		默认值：0
+
+-SPL框架
+		配置文件
+		启用全局构建SPL。
+
+		CONFIG_SPL_LDSCRIPT
+		LDSCRIPT，用于链接SPL二进制文件。
+
+		CONFIG_SPL_MAX_FOOTPRINT
+		分配给SPL（包括BSS）的最大内存大小。
+		定义后，链接器将检查实际内存
+		SPL从_start到__bss_end使用的数量不超过该数量。
+		CONFIG_SPL_MAX_FOOTPRINT和CONFIG_SPL_BSS_MAX_SIZE
+		不能同时定义两者。
+
+		CONFIG_SPL_MAX_SIZE
+		SPL图片的最大大小（文本，数据，rodata和
+		链接器列出的部分），不包括BSS。
+		定义后，链接器将检查实际大小
+		不超过它。
+
+		CONFIG_SPL_RELOC_TEXT_BASE
+		搬到的地址。如果未指定，则等于
+		CONFIG_SPL_TEXT_BASE（即未完成重定位）。
+
+		CONFIG_SPL_BSS_START_ADDR
+		SPL二进制文件中BSS的链接地址。
+
+		CONFIG_SPL_BSS_MAX_SIZE
+		分配给SPL BSS的最大内存大小。
+		定义后，链接器将检查所使用的实际内存
+		SPL从__bss_start到__bss_end的值不超过它。
+		CONFIG_SPL_MAX_FOOTPRINT和CONFIG_SPL_BSS_MAX_SIZE
+		不能同时定义两者。
+
+		CONFIG_SPL_STACK
+		SPL堆栈开始的地址将使用
+
+		CONFIG_SPL_PANIC_ON_RAW_IMAGE
+		定义后，如果SPL具有图像，则它将panic（）
+		加载没有签名。
+		当加载图像的代码定义时，这很有用
+		在SPL中不能保证绝对所有读取错误
+		将被抓住。
+		LPC32XX MLC NAND驱动程序就是一个例子，它将
+		认为完全无法读取的NAND块是不好的，
+		因此应该默默地跳过。
+
+		CONFIG_SPL_RELOC_STACK
+		堆栈SPL的开始地址将在之后使用
+		搬迁。如果未指定，则等于
+		CONFIG_SPL_STACK。
+
+		CONFIG_SYS_SPL_MALLOC_START
+		SPL中使用的malloc池的起始地址。
+		设置此选项后，将在SPL和
+		它是由spl_init（）设置的，然后是简单的malloc（）
+		如果定义了CONFIG_SYS_MALLOC_F，则可以使用。
+
+		CONFIG_SYS_SPL_MALLOC_SIZE
+		SPL中使用的malloc池的大小。
+
+		CONFIG_SPL_OS_BOOT
+		启用直接从SPL引导到操作系统的功能。
+		另请参阅：doc / README.falcon
+
+		CONFIG_SPL_DISPLAY_PRINT
+		对于ARM，启用可选功能以打印更多信息
+		关于正在运行的系统。
+
+		CONFIG_SPL_INIT_MINIMAL
+		Arch初始化代码应构建为非常小的图像
+
+		CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_PARTITION
+		在MMC上进行分区以从MMC开始加载U-Boot
+		在原始模式下使用
+
+		CONFIG_SYS_MMCSD_RAW_MODE_KERNEL_SECTOR
+		从MMC正在加载内核uImage的扇区
+		用于原始模式（用于猎鹰模式）
+
+		CONFIG_SYS_MMCSD_RAW_MODE_ARGS_SECTOR，
+		CONFIG_SYS_MMCSD_RAW_MODE_ARGS_SECTORS
+		要加载内核参数的扇区和扇区数
+		在原始模式下使用MMC时的参数
+		（对于猎鹰模式）
+
+		CONFIG_SPL_FS_LOAD_PAYLOAD_NAME
+		从文件系统读取时读取以加载U-Boot的文件名
+
+		CONFIG_SPL_FS_LOAD_KERNEL_NAME
+		读取时读取的文件名以加载内核uImage
+		从文件系统（对于猎鹰模式）
+
+		CONFIG_SPL_FS_LOAD_ARGS_NAME
+		读取以加载内核参数参数的文件名
+		从文件系统读取时（对于Falcon模式）
+
+		CONFIG_SPL_MPC83XX_WAIT_FOR_NAND
+		在PPC mpc83xx目标上为NAND SPL设置此选项，以便
+		start.S等待SPL的其余部分加载之前
+		继续（硬件仅在刚开始执行
+		加载第一页而不是整个4K）。
+
+		CONFIG_SPL_SKIP_RELOCATE
+		避免SPL重定位
+
+		CONFIG_SPL_NAND_IDENT
+		SPL使用芯片ID列表来标识NAND闪存。
+		需要CONFIG_SPL_NAND_BASE。
+
+		CONFIG_SPL_UBI
+		支持轻量级的UBI（fastmap）扫描仪和
+		装载机
+
+		CONFIG_SPL_NAND_RAW_ONLY
+		支持仅引导原始u-boot.bin映像。仅使用此
+		如果您需要节省空间。
+
+		CONFIG_SPL_COMMON_INIT_DDR
+		设置公共ddr init，并在其中进行串行状态检测
+		SPL二进制。
+
+		CONFIG_SYS_NAND_5_ADDR_CYCLE，CONFIG_SYS_NAND_PAGE_COUNT，
+		CONFIG_SYS_NAND_PAGE_SIZE，CONFIG_SYS_NAND_OOBSIZE，
+		CONFIG_SYS_NAND_BLOCK_SIZE，CONFIG_SYS_NAND_BAD_BLOCK_POS，
+		CONFIG_SYS_NAND_ECCPOS，CONFIG_SYS_NAND_ECCSIZE，
+		CONFIG_SYS_NAND_ECCBYTES
+		定义SPL使用的NAND的大小和行为
+		阅读U-Boot
+
+		CONFIG_SYS_NAND_U_BOOT_OFFS
+		在NAND中读取U-Boot的位置
+
+		CONFIG_SYS_NAND_U_BOOT_DST
+		内存中要加载U-Boot的位置
+
+		CONFIG_SYS_NAND_U_BOOT_SIZE
+		要加载的图像大小
+
+		CONFIG_SYS_NAND_U_BOOT_START
+		加载图像中的入口点以跳转到
+
+		CONFIG_SYS_NAND_HW_ECC_OOBFIRST
+		如果您需要先阅读OOB，然后再阅读
+		数据。例如，这在davinci平台上使用。
+
+		CONFIG_SPL_RAM_DEVICE
+		支持以SPL二进制文件形式在ram中已经存在的运行映像
+
+		CONFIG_SPL_PAD_TO
+		在附加SPL之前应将其填充到的图像偏移量
+		SPL有效负载。默认情况下，这被定义为
+		CONFIG_SPL_MAX_SIZE，如果未定义CONFIG_SPL_MAX_SIZE，则为0。
+		CONFIG_SPL_PAD_TO必须为0，这意味着要附加SPL
+		有效负载而没有任何填充，或> = CONFIG_SPL_MAX_SIZE。
+
+		CONFIG_SPL_TARGET
+		包含SPL和有效负载的最终目标图像。一些SPL
+		而是使用特定于Arch的Makefile片段
+		例如，如果需要制作一张以上的图像。
+
+		CONFIG_SPL_FIT_PRINT
+		打印有关FIT图像的信息会增加很多
+		代码到SPL。因此，通常在SPL中将其禁用。用这个
+		重新启用它的选项。这会影响
+		引导FIT映像时的bootm命令。
+
+-TPL框架
+		配置文件
+		全局启用TPL的构建。
+
+		CONFIG_TPL_PAD_TO
+		在附加TPL之前应将其填充到的图像偏移量
+		TPL有效负载。默认情况下，这被定义为
+		CONFIG_SPL_MAX_SIZE，如果未定义CONFIG_SPL_MAX_SIZE，则为0。
+		CONFIG_SPL_PAD_TO必须为0，这意味着要附加SPL
+		有效负载而没有任何填充，或> = CONFIG_SPL_MAX_SIZE。
+
+-中断支持（PPC）：
+
+		有常见的interrupt_init（）和timer_interrupt（）
+		适用于所有PPC拱门。interrupt_init（）调用interrupt_init_cpu（）
+		用于特定于CPU的初始化。interrupt_init_cpu（）
+		应该将decrementer_count设置为适当的值。如果
+		中断后，CPU自动复位减量器
+		（ppc4xx），则应将decrementer_count设置为零。
+		timer_interrupt（）为CPU调用timer_interrupt_cpu（）
+		具体处理。如果董事会有看门狗/ status_led
+		/ other_activity_monitor，它可以自动从
+		一般的timer_interrupt（）。
+
+
+电路板初始化设置：
+------------------------------
+
+在初始化期间，u-boot调用了许多主板特定的功能
+允许准备电路板特定的先决条件，例如引脚设置
+在驱动程序初始化之前。要启用这些回调，
+必须定义以下配置宏。目前这是
+特定于架构的，因此请检查arch / your_architecture / lib / board.c
+通常在board_init_f（）和board_init_r（）中。
+
+-CONFIG_BOARD_EARLY_INIT_F：调用board_early_init_f（）
+-CONFIG_BOARD_EARLY_INIT_R：调用board_early_init_r（）
+-CONFIG_BOARD_LATE_INIT：呼叫board_late_init（）
+-CONFIG_BOARD_POSTCLK_INIT：调用board_postclk_init（）
+
+配置设置：
+-----------------------
+
+-MEM_SUPPORT_64BIT_DATA：如果编译为64位，则自动定义。
+		可以选择将其定义为支持64位内存命令。
+
+-CONFIG_SYS_LONGHELP：在希望包含较长的帮助消息时定义；
+		内存不足时，请取消定义。
+
+-CONFIG_SYS_HELP_CMD_WIDTH：在要覆盖默认值时定义
+		“帮助”命令输出中列出的命令的宽度。
+
+-CONFIG_SYS_PROMPT：这是U-Boot在控制台上打印到的内容
+		提示用户输入。
+
+-CONFIG_SYS_CBSIZE：从控制台输入的缓冲区大小
+
+-CONFIG_SYS_PBSIZE：控制台输出的缓冲区大小
+
+-CONFIG_SYS_MAXARGS：最大 监视命令接受的参数数量
+
+-CONFIG_SYS_BARGSIZE：引导参数的缓冲区大小，该缓冲区传递给
+		应用程序（通常是Linux内核）
+		开机
+
+-CONFIG_SYS_BAUDRATE_TABLE：
+		此板的合法波特率设置列表。
+
+-CONFIG_SYS_MEM_RESERVE_SECURE
+		目前仅针对ARMv8实现。
+		如果已定义，则CONFIG_SYS_MEM_RESERVE_SECURE内存的大小
+		从总RAM中减去，不会报告给OS。
+		该内存可以用作安全内存。一个变量
+		gd-> arch.secure_ram用于跟踪位置。在系统中
+		RAM的基数不为零，或RAM分为存储体，
+		需要重新计算该变量以获取地址。
+
+-CONFIG_SYS_MEM_TOP_HIDE：
+		如果在板配置头中定义了CONFIG_SYS_MEM_TOP_HIDE，
+		该指定的内存区域将从顶部减去
+		（结束）RAM，U-Boot完全不会“触动”。通过
+		修复gd-> ram_size应该通过Linux内核
+		现在已“更正”的内存大小，也不会碰它。
+		这应该适用于arch / ppc和arch / powerpc。仅Linux
+		具有bootwrapper支持的arch / powerpc中的板端口
+		通过SDRAM控制器设置重新计算内存大小
+		将必须另外在Linux中修复。
+
+		此选项可用作440EPx / GRx的解决方法
+		CHIP 11勘误表，其中SDRAM中的最后256个字节不应
+		被感动。
+
+		警告：请确保此值是的倍数
+		Linux页面大小（通常为4k）。如果不是这样，
+		那么Linux内存的结束地址将位于
+		非页面大小对齐的地址，这可能会导致
+		问题。
+
+-CONFIG_SYS_LOADS_BAUD_CHANGE：
+		串行下载时启用临时波特率更改
+
+-CONFIG_SYS_SDRAM_BASE：
+		SDRAM的物理起始地址。_这里必须为0。
+
+-CONFIG_SYS_FLASH_BASE：
+		闪存的物理起始地址。
+
+-CONFIG_SYS_MONITOR_BASE：
+		引导监视器代码的物理起始地址（由
+		使配置文件与文本基址相同
+		（CONFIG_SYS_TEXT_BASE）链接时使用）-与
+		从闪存启动时为CONFIG_SYS_FLASH_BASE。
+
+-CONFIG_SYS_MONITOR_LEN：
+		保留用于监视器代码的内存大小，用于
+		如果环境为_at_compile_time_（！）
+		嵌入在U-Boot映像中或单独
+		闪存扇区。
+
+-CONFIG_SYS_MALLOC_LEN：
+		保留给malloc（）使用的DRAM大小。
+
+-CONFIG_SYS_MALLOC_F_LEN
+		重定位前要使用的malloc（）池的大小。如果
+		这是定义的，然后是一个非常简单的malloc（）实现
+		在搬迁之前将变为可用。地址是
+		低于全局数据，然后将堆栈向下移动以使
+		空间。
+
+		此功能分配地址增加的区域
+		在区域内。支持calloc（），但realloc（）
+		不可用。支持free（），但不执行任何操作。
+		当以下情况时，内存将被释放（或者实际上只是被忘记了）
+		U-Boot自行重定位。
+
+-CONFIG_SYS_MALLOC_SIMPLE
+		为那些提供简单的小型malloc（）和calloc（）
+		在SPL中不使用完整malloc的主板
+		通过CONFIG_SYS_SPL_MALLOC_START启用）。
+
+-CONFIG_SYS_NONCACHED_MEMORY：
+		非缓存内存区域的大小。该内存区域将是
+		通常位于malloc（）区域下方并已映射
+		在MMU中未缓存。这对于将
+		否则需要大量的显式缓存维护。对于
+		一些驱动程序，也无法正确维护
+		缓存。例如，如果需要冲洗的区域
+		不是缓存行大小，*和*填充的倍数
+		无法在区域之间分配以使其对齐（即
+		如果硬件需要连续的区域数组，并且
+		每个区域的大小未与缓存对齐），然后刷新
+		一个区域可能会导致覆盖硬件具有的数据
+		写入同一高速缓存行中的另一个区域。这个可以
+		例如发生在网络驱动程序中
+		缓冲区通常小于CPU缓存行（例如
+		16字节与32或64字节）。
+
+		目前仅32位ARM支持非缓存内存。
+
+-CONFIG_SYS_BOOTM_LEN：
+		通常，压缩的uImage限于
+		未压缩的8 MB大小。如果还不够，
+		您可以在电路板配置文件中定义CONFIG_SYS_BOOTM_LEN
+		根据您的需要调整此设置。
+
+-CONFIG_SYS_BOOTMAPSZ：
+		启动代码映射的最大内存大小
+		Linux内核；所有必须处理的数据
+		Linux内核（bd_info，引导参数，FDT blob如果
+		使用）必须置于此限制以下，除非“ bootm_low”
+		环境变量已定义且非零。在这种情况下
+		Linux内核的所有数据都必须在“ bootm_low”之间
+		和“ bootm_low” + CONFIG_SYS_BOOTMAPSZ。环境
+		变量“ bootm_mapsize”将覆盖
+		CONFIG_SYS_BOOTMAPSZ。如果未定义CONFIG_SYS_BOOTMAPSZ，
+		然后将使用“ bootm_size”中的值代替。
+
+-CONFIG_SYS_BOOT_RAMDISK_HIGH：
+		启用initrd_high功能。如果定义，则
+		启用了initrd_high功能，​​并且bootm ramdisk子命令
+		已启用。
+
+-CONFIG_SYS_BOOT_GET_CMDLINE：
+		启用分配和保存内核cmdline的空间
+		“ bootm_low”和“ bootm_low” + BOOTMAPSZ。
+
+-CONFIG_SYS_BOOT_GET_KBD：
+		启用分配和保存bd_info的内核副本到
+		“ bootm_low”和“ bootm_low”之间的空间+ BOOTMAPSZ。
+
+-CONFIG_SYS_MAX_FLASH_BANKS：
+		闪存库的最大数量
+
+-CONFIG_SYS_MAX_FLASH_SECT：
+		闪存芯片上的最大扇区数
+
+-CONFIG_SYS_FLASH_ERASE_TOUT：
+		Flash擦除操作超时（以毫秒为单位）
+
+-CONFIG_SYS_FLASH_WRITE_TOUT：
+		Flash写操作超时（以毫秒为单位）
+
+-CONFIG_SYS_FLASH_LOCK_TOUT
+		Flash设置扇区锁定位操作的超时时间（毫秒）
+
+-CONFIG_SYS_FLASH_UNLOCK_TOUT
+		Flash清除锁定位操作的超时时间（毫秒）
+
+-CONFIG_SYS_FLASH_PROTECTION
+		如果定义，则使用硬件闪存扇区保护
+		而不是U-Boot软件保护。
+
+-CONFIG_SYS_DIRECT_FLASH_TFTP：
+
+		启用TFTP直接传输到闪存；
+		如果没有此选项，则必须下载
+		分两个步骤执行：（1）下载到RAM，以及（2）
+		从RAM复制到闪存。
+
+		两步方法通常更可靠，因为
+		您可以在删除之前检查下载是否正常
+		闪存，但在某些情况下（当系统RAM
+		太局限了，无法临时复制
+		下载的图片），此选项可能非常有用。
+
+-CONFIG_SYS_FLASH_CFI：
+		定义Flash驱动程序是否在驱动程序中使用了其他元素
+		用于存储闪光灯几何体的通用闪光灯结构。
+
+-CONFIG_FLASH_CFI_DRIVER
+		此选项还启用了cfi_flash驱动程序的构建
+		在驱动程序目录中
+
+-CONFIG_FLASH_CFI_MTD
+		此选项启用cfi_mtd驱动程序的构建
+		在驱动程序目录中。驱动程序导出CFI闪存
+		到MTD层。
+
+-CONFIG_SYS_FLASH_USE_BUFFER_WRITE
+		使用缓冲写入来闪存。
+
+-CONFIG_FLASH_SPANSION_S29WS_N
+		s29ws-n MirrorBit闪存具有用于缓冲的非标准地址
+		编写命令。
+
+-CONFIG_SYS_FLASH_QUIET_TEST
+		如果定义了此选项，则通用CFI闪光灯不会
+		在未识别的闪存银行上打印警告。这个
+		如果某些已配置的存储区仅
+		可选。
+
+-CONFIG_FLASH_SHOW_PROGRESS
+		如果已定义（必须为整数），则打印倒计时
+		数字和点。推荐值：45（9..1）表示80
+		列显示，15（3..1）代表40列显示。
+
+-CONFIG_FLASH_VERIFY
+		如果已定义，则比较闪存（目标）的内容
+		写操作后针对源。错误讯息
+		当内容不相同时将打印。
+		请注意，此选项几乎在所有情况下都没有用，
+		由于通常会较早地检测到此类闪存编程错误
+		同时取消保护/擦除/编程。请只启用
+		如果您真的知道自己在做什么，则选择此选项。
+
+-CONFIG_SYS_RX_ETH_BUFFER：
+		定义以太网接收缓冲区的数量。一些
+		以太网控制器，建议设置该值
+		到8甚至更高（EEPRO100或405 EMAC），因为所有
+		启用接口后不久，缓冲区可能已满
+		在高以太网流量上。
+		如果未定义，则默认为4。
+
+-CONFIG_ENV_MAX_ENTRIES
+
+	哈希表中使用的最大条目数
+	在内部存储环境设置。默认值
+	设置应该是慷慨的，并且应该可以在大多数情况下使用
+	案件。此设置可用于调整行为。看到
+	有关详细信息，请参见lib / hashtable.c。
+
+-CONFIG_ENV_FLAGS_LIST_DEFAULT
+-CONFIG_ENV_FLAGS_LIST_STATIC
+	在以下情况下启用对提供给环境变量的值的验证
+	调用环境集。变量只能限制为十进制，
+	十六进制或布尔值。如果还定义了CONFIG_CMD_NET，
+	变量也可以限制为IP地址或MAC地址。
+
+	列表的格式为：
+		type_attribute = [s | d | x | b | i | m]
+		access_attribute = [a | r | o | c]
+		属性= type_attribute [access_attribute]
+		entry = variable_name [：attributes]
+		列表=条目[，列表]
+
+	类型属性是：
+		s-字符串（默认）
+		d-小数
+		x-十六进制
+		b-布尔值（[1yYtT | 0nNfF]）
+		i-IP地址
+		m-MAC地址
+
+	访问属性为：
+		a-任何（默认）
+		r-只读
+		o-一次写入
+		c-更改默认值
+
+	-CONFIG_ENV_FLAGS_LIST_DEFAULT
+		将此定义为列表（字符串）以定义“ .flags”
+		默认或嵌入式环境中的环境变量。
+
+	-CONFIG_ENV_FLAGS_LIST_STATIC
+		将此定义为列表（字符串）以定义验证
+		如果在“ .flags”中找不到条目，​​应该执行
+		环境变量。覆盖静态设置
+		列表中，只需将具有相同变量名的条目添加到
+		“ .flags”变量。
+
+	如果定义了CONFIG_REGEX，则上面的variable_name被评估为
+	正则表达式。这允许多个变量定义相同的变量
+	标志，而没有为每个变量明确列出它们。
+
+以下有关放置和管理的定义
+环境数据（可变面积）；总的来说，我们支持
+以下配置：
+
+-CONFIG_BUILD_ENVCRC：
+
+	使用目标环境构建envcrc，以便外部工具
+	可以轻松提取它并将其嵌入最终的U-Boot映像中。
+
+小心！第一次进入环境发生得很早
+在U-Boot初始化中（当我们尝试获取的设置时
+控制台波特率）。您*必须*然后已经映射了您的NVRAM区域，或者
+U-Boot将挂起。
+
+请注意，即使使用NVRAM，我们仍会使用
+RAM中的环境：我们可以直接在NVRAM上工作，但是我们想
+除非有人使用“ saveenv”，否则请始终保持设置不变
+保存当前设置。
+
+小心！在某些特殊情况下，本地设备无法使用
+“ saveenv”命令。例如，本地设备将获得
+通过SRIO或PCIE链接存储在远程NOR闪存中的环境，
+但不能擦除，请通过SRIO或PCIE接口写入此NOR闪存。
+
+-CONFIG_NAND_ENV_DST
+
+	定义nand_spl代码应将RAM复制到的RAM中的地址。
+	环境。如果使用冗余环境，它将被复制到
+	CONFIG_NAND_ENV_DST + CONFIG_ENV_SIZE。
+
+请注意，该环境在监视器之前是只读的
+已重定位到RAM，并且该环境的RAM副本已
+创建 另外，使用EEPROM时，您必须使用env_get_f（）
+在那之前要读取环境变量。
+
+该环境受CRC32校验和保护。显示器前
+被重定位到RAM中，由于CRC错误，您将可以正常工作
+内置默认环境-*静默* !!! [这是
+必要，因为我们需要的第一个环境变量是
+控制台的“波特率”设置-如果我们的CRC错误，则不会
+还有任何我们可以抱怨的设备。]
+
+注意：将显示器重新放置后，它将抱怨是否
+使用默认环境；您一计算出新的CRC
+使用“ saveenv”命令存储有效环境。
+
+-CONFIG_SYS_FAULT_ECHO_LINK_DOWN：
+		将反向的以太网链接状态回显到故障LED。
+
+		注意：如果此选项处于活动状态，则CONFIG_SYS_FAULT_MII_ADDR
+		      还需要定义。
+
+-CONFIG_SYS_FAULT_MII_ADDR：
+		PHY的MII地址，以检查以太网链路状态。
+
+-CONFIG_NS16550_MIN_FUNCTIONS：
+		如果只希望使用NS16550_init，请定义此定义
+		和NS16550_putc函数用于位于
+		驱动程序/序列号/ns16550.c。此选项对于保存非常有用
+		已经非常受限的图像的空间，包括但不限于
+		限于NAND_SPL配置。
+
+-CONFIG_DISPLAY_BOARDINFO
+		显示有关运行U-Boot的板的信息
+		当U-Boot启动时。板函数checkboard（）被调用
+		去做这个。
+
+-CONFIG_DISPLAY_BOARDINFO_LATE
+		与上一个选项类似，但显示此信息
+		稍后，一旦stdio运行并输出到LCD，如果
+		当下。
+
+-CONFIG_BOARD_SIZE_LIMIT：
+		U引导映像的最大大小。定义后，
+		构建系统检查实际大小是否不正确
+		超过它。
+
+低级别（与硬件相关）的配置选项：
+-------------------------------------------------- --
+
+-CONFIG_SYS_CACHELINE_SIZE：
+		CPU的缓存行大小。
+
+-CONFIG_SYS_CCSRBAR_DEFAULT：
+		飞思卡尔CCSR的默认（上电复位）物理地址
+		PowerPC SOC。
+
+-CONFIG_SYS_CCSRBAR：
+		CCSR的虚拟地址。在32位版本中，通常
+		与CONFIG_SYS_CCSRBAR_DEFAULT的值相同。
+
+-CONFIG_SYS_CCSRBAR_PHYS：
+		CCSR的物理地址。CCSR可以搬迁到新的
+		实际地址（如果需要）。在这种情况下，此宏应
+		设置为该地址。否则，应将其设置为
+		与CONFIG_SYS_CCSRBAR_DEFAULT相同的值。例如，CCSR
+		通常在36位版本上重定位。推荐
+		通过_HIGH和_LOW宏定义此宏：
+
+		＃定义CONFIG_SYS_CCSRBAR_PHYS（（CONFIG_SYS_CCSRBAR_PHYS_HIGH
+			* 1ull）<< 32 | CONFIG_SYS_CCSRBAR_PHYS_LOW）
+
+-CONFIG_SYS_CCSRBAR_PHYS_HIGH：
+		CONFIG_SYS_CCSRBAR_PHYS的位33-36。该值通常是
+		0（32位版本）或0xF（36位版本）。这个宏是
+		在汇编代码中使用，因此它不能包含类型转换或
+		整数大小的后缀（例如“ ULL”）。
+
+-CONFIG_SYS_CCSRBAR_PHYS_LOW：
+		CONFIG_SYS_CCSRBAR_PHYS的低32位。这个宏是
+		在汇编代码中使用，因此它不能包含类型转换或
+		整数大小的后缀（例如“ ULL”）。
+
+-CONFIG_SYS_CCSR_DO_NOT_RELOCATE：
+		如果定义了此宏，则CONFIG_SYS_CCSRBAR_PHYS将为
+		强制为确保不会重定位CCSR的值。
+
+-CONFIG_IDE_AHB：
+		大多数IDE控制器被设计为与PCI连接
+		接口。其中只有少数是为AHB接口设计的。
+		当软件正在执行ATA命令并将数据传输到
+		通过IDE-AHB控制器的IDE设备，一些其他功能
+		注册访问此类IDE-AHB控制器的权限
+		是必须的。
+
+-CONFIG_SYS_IMMR：内部存储器的物理地址。
+		除非您确切知道自己的身份，否则请不要更改
+		在做！（11-4）[仅适用于MPC8xx系统]
+
+-CONFIG_SYS_INIT_RAM_ADDR：
+
+		可用于的存储区的起始地址
+		初始数据和堆栈；请注意，这必须是
+		可写内存，无需特殊操作
+		初始化，即您不能使用普通的RAM
+		只有在对
+		内存控制器并运行某些初始化
+		序列。
+
+		U-Boot使用以下内存类型：
+		-MPC8xx：IMMR（CPU的内部存储器）
+
+-CONFIG_SYS_GBL_DATA_OFFSET：
+
+		内存中初始数据结构的偏移
+		由CONFIG_SYS_INIT_RAM_ADDR定义的区域。通常
+		选择CONFIG_SYS_GBL_DATA_OFFSET以使初始
+		数据位于可用空间的末尾
+		（有时写为（CONFIG_SYS_INIT_RAM_SIZE-
+		GENERATED_GBL_DATA_SIZE），初始堆栈只是
+		在该区域以下（从（CONFIG_SYS_INIT_RAM_ADDR +
+		CONFIG_SYS_GBL_DATA_OFFSET）向下。
+
+	注意：
+		在MPC824X（或其他使用数据的系统上）
+		缓存用于初始存储）选择的地址
+		CONFIG_SYS_INIT_RAM_ADDR基本上是任意的-它必须
+		指向之间的一个未使用的地址空间
+		RAM的顶部和PCI空间的开始。
+
+-CONFIG_SYS_SCCR：系统时钟和复位控制寄存器（15-27）
+
+-CONFIG_SYS_OR_TIMING_SDRAM：
+		SDRAM时序
+
+-CONFIG_SYS_MAMR_PTA：
+		定期刷新计时器
+
+-FLASH_BASE0_PRELIM，FLASH_BASE1_PRELIM，CONFIG_SYS_REMAP_OR_AM，
+  CONFIG_SYS_PRELIM_OR_AM，CONFIG_SYS_OR_TIMING_FLASH，CONFIG_SYS_OR0_REMAP，
+  CONFIG_SYS_OR0_PRELIM，CONFIG_SYS_BR0_PRELIM，CONFIG_SYS_OR1_REMAP，CONFIG_SYS_OR1_PRELIM，
+  CONFIG_SYS_BR1_PRELIM：
+		内存控制器定义：BR0 / 1和OR0 / 1（闪存）
+
+-SDRAM_BASE2_PRELIM，SDRAM_BASE3_PRELIM，SDRAM_MAX_SIZE，
+  CONFIG_SYS_OR_TIMING_SDRAM，CONFIG_SYS_OR2_PRELIM，CONFIG_SYS_BR2_PRELIM，
+  CONFIG_SYS_OR3_PRELIM，CONFIG_SYS_BR3_PRELIM：
+		内存控制器定义：BR2 / 3和OR2 / 3（SDRAM）
+
+-CONFIG_PCI_ENUM_ONLY
+		仅扫描并获取总线上的设备。
+		不要进行任何设置工作，大概是因为有人或
+		已经完成了一些操作，而我们不需要这样做
+		第二次。对于预引导的平台很有用
+		通过coreboot或类似方法。
+
+-CONFIG_PCI_INDIRECT_BRIDGE：
+		启用对间接PCI桥的支持。
+
+-CONFIG_SYS_SRIO：
+		芯片是否具有SRIO
+
+-CONFIG_SRIO1：
+		板上有SRIO 1端口可用
+
+-CONFIG_SRIO2：
+		板上有可用的SRIO 2端口
+
+-CONFIG_SRIO_PCIE_BOOT_MASTER
+		板卡可以支持从SRIO和PCIE引导的主功能
+
+-CONFIG_SYS_SRIOn_MEM_VIRT：
+		SRIO端口“ n”存储区的虚拟地址
+
+-CONFIG_SYS_SRIOn_MEM_PHYxS：
+		SRIO端口“ n”存储区的物理地址
+
+-CONFIG_SYS_SRIOn_MEM_SIZE：
+		SRIO端口“ n”存储区的大小
+
+-CONFIG_SYS_NAND_BUSWIDTH_16BIT
+		定义为告知NAND控制器NAND芯片正在使用
+		16位总线。
+		并非所有的NAND驱动程序都使用该符号。
+		使用它的驱动程序示例：
+		-驱动程序/mtd/nand/raw/ndfc.c
+		-驱动程序/mtd/nand/raw/mxc_nand.c
+
+-CONFIG_SYS_NDFC_EBC0_CFG
+		设置NDFC的EBC0_CFG寄存器。如果未定义
+		将使用默认值。
+
+-CONFIG_SPD_EEPROM
+		从I2C EEPROM获取DDR时序信息。共同
+		带有可插拔内存模块（例如SODIMM）
+
+  SPD_EEPROM_ADDRESS
+		SPD EEPROM的I2C地址
+
+-CONFIG_SYS_SPD_BUS_NUM
+		如果SPD EEPROM不在第一个I2C总线上
+		一，在这里指定。请注意，该值必须解析
+		到您的驾驶员可以处理的东西。
+
+-CONFIG_SYS_DDR_RAW_TIMING
+		从SPD以外的地方获取DDR时序信息。常见于
+		不带SPD的板上焊接DDR芯片。DDR原始时序
+		从数据表中提取参数并将其硬编码为
+		头文件或主板专用文件。
+
+-CONFIG_FSL_DDR_INTERACTIVE
+		启用交互式DDR调试。参见doc / README.fsl-ddr。
+
+-CONFIG_FSL_DDR_SYNC_REFRESH
+		为多个控制器启用刷新同步。
+
+-CONFIG_FSL_DDR_BIST
+		为飞思卡尔DDR控制器启用内置内存测试。
+
+-CONFIG_SYS_83XX_DDR_USES_CS0
+		仅适用于83xx系统。如果指定，则DDR应该
+		使用CS0和CS1而不是CS2和CS3进行配置。
+
+-配置_RMII
+		对所有FEC启用RMII模式。
+		请注意，这是一个全局选项，我们不能
+		在标准MII模式下有一个FEC，在RMII模式下有另一个。
+
+-CONFIG_CRC32_VERIFY
+		将验证选项添加到crc32命令。
+		语法为：
+
+		=> crc32 -v <地址> <计数> <crc32>
+
+		地址/计数表示存储区
+		并且crc32是正确的crc32
+		区域应该有。
+
+-CONFIG_LOOPW
+		添加“ loopw”内存命令。仅在以下情况下有效
+		内存命令被全局激活（CONFIG_CMD_MEMORY）。
+
+-CONFIG_CMD_MX_CYCLIC
+		添加“ mdc”和“ mwc”存储器命令。这些是循环的
+		“ md / mw”命令。
+		例子：
+
+		=> mdc.b 10 4 500
+		该命令将每500毫秒打印4个字节（10,11,12,13）。
+
+		=> mwc.l 100 12345678 10
+		该命令将在10 ms内将12345678写入地址100。
+
+		仅在激活了内存命令后才会生效
+		全局（CONFIG_CMD_MEMORY）。
+
+-CONFIG_SKIP_LOWLEVEL_INIT
+		[仅适用于ARM，NDS32，MIPS和RISC-V]如果定义了此变量，则确定
+		低级初始化（例如设置内存）
+		控制器）被省略和/或U-Boot不被
+		重新定位到RAM。
+
+		通常，不得定义此变量。唯一的
+		例外是某些人将U-Boot加载到RAM时
+		其他引导加载程序或由执行以下操作的调试器
+		这些初始化本身。
+
+-CONFIG_SKIP_LOWLEVEL_INIT_ONLY
+		[仅适用于ARM926EJ-S]这仅允许调用lowlevel_init（）
+		被跳过。正常的CP15初始化（例如启用
+		指令缓存）仍在执行。
+
+-CONFIG_SPL_BUILD
+		在当前运行的编译用于工件时设置
+		最终会出现在SPL中（而不是TPL或U-Boot）
+		正确）。需要阶段特定行为的代码应检查
+		这个。
+
+-CONFIG_TPL_BUILD
+		在当前运行的编译用于工件时设置
+		最终会在TPL中（而不是SPL或U-Boot）
+		正确）。需要阶段特定行为的代码应检查
+		这个。
+
+-CONFIG_SYS_MPC85XX_NO_RESETVEC
+		仅适用于85xx系统。如果指定了此变量，则本节
+		.resetvec不保留，.bootpg节放在
+		.text部分的前4k。
+
+-CONFIG_ARCH_MAP_SYSMEM
+		通常，U-Boot（尤其是md命令）使用
+		有效地址。因此，没有必要考虑
+		U引导地址作为需要转换的虚拟地址
+		到物理地址。但是，沙箱需要这样做，因为
+		它维护自己的小RAM缓冲区，其中包含所有
+		可寻址内存。此选项导致一些内存访问
+		通过map_sysmem（）/ unmap_sysmem（）进行映射。
+
+-CONFIG_X86_RESET_VECTOR
+		如果定义，则包含x86复位向量代码。这不是
+		从Coreboot运行U-Boot时需要。
+
+-CONFIG_SYS_NAND_NO_SUBPAGE_WRITE
+		选项以禁用NAND驱动程序中的子页面写入
+		使用此的驱动程序：
+		驱动程序/mtd/nand/raw/davinci_nand.c
+
+飞思卡尔QE / FMAN固件支持：
+-----------------------------------
+
+飞思卡尔QUICCEngine（QE）和Frame Manager（FMAN）均支持
+加载以QE固件二进制格式编码的“固件”。
+U-Boot引导期间通常需要加载此固件，因此宏
+用于识别存储设备（NOR闪存，SPI等）和地址
+在该设备中。
+
+-CONFIG_SYS_FMAN_FW_ADDR
+	FMAN微码所在的存储设备中的地址。的
+	该地址的含义取决于哪个CONFIG_SYS_QE_FMAN_FW_IN_xxx宏
+	也被指定。
+
+-CONFIG_SYS_QE_FW_ADDR
+	QE微码所在的存储设备中的地址。的
+	该地址的含义取决于哪个CONFIG_SYS_QE_FMAN_FW_IN_xxx宏
+	也被指定。
+
+-CONFIG_SYS_QE_FMAN_FW_LENGTH
+	固件的最大可能大小。固件二进制格式
+	有一个字段，用于指定固件的实际大小，但是
+	可能无法读取固件的任何部分，除非某些
+	分配本地存储以首先保存整个固件。
+
+-CONFIG_SYS_QE_FMAN_FW_IN_NOR
+	指定QE / FMAN固件位于NOR闪存中，映射为
+	通过LBC的普通可寻址存储器。CONFIG_SYS_FMAN_FW_ADDR是
+	NOR闪存中的虚拟地址。
+
+-CONFIG_SYS_QE_FMAN_FW_IN_NAND
+	指定QE / FMAN固件位于NAND闪存中。
+	CONFIG_SYS_FMAN_FW_ADDR是NAND闪存中的偏移量。
+
+-CONFIG_SYS_QE_FMAN_FW_IN_MMC
+	指定QE / FMAN固件位于主SD / MMC上
+	设备。CONFIG_SYS_FMAN_FW_ADDR是该设备上的字节偏移。
+
+-CONFIG_SYS_QE_FMAN_FW_IN_REMOTE
+	指定QE / FMAN固件位于远程（主）中
+	内存空间。CONFIG_SYS_FMAN_FW_ADDR是一个虚拟地址，
+	可以从从属TLB->从属LAW->从属SRIO或PCIE出站映射
+	窗口->主入站窗口->主法律->中的ucode地址
+	主人的记忆空间。
+
+飞思卡尔Layerscape Management Complex固件支持：
+-------------------------------------------------- -------
+飞思卡尔Layerscape Management Complex（MC）支持加载
+“固件”。
+U-Boot引导期间通常需要加载此固件，因此宏
+用于识别存储设备（NOR闪存，SPI等）和地址
+在该设备中。
+
+-CONFIG_FSL_MC_ENET
+	为Layerscape SoC启用MC驱动程序。
+
+飞思卡尔Layerscape Debug Server支持：
+-------------------------------------------
+飞思卡尔Layerscape Debug Server支持支持加载
+“调试服务器固件”并触发SP引导ROM。
+U-Boot引导期间通常需要加载此固件。
+
+-CONFIG_SYS_MC_RSV_MEM_ALIGN
+	定义保留内存MC的对齐要求
+
+可复制的构建
+-------------------
+
+为了实现可复制的构建，U-Boot构建中使用了时间戳
+过程必须设置为固定值。
+
+这是使用SOURCE_DATE_EPOCH环境变量完成的。
+SOURCE_DATE_EPOCH将在构建主机的外壳上设置，而不是作为配置
+U-Boot的选项或U-Boot中的环境变量。
+
+SOURCE_DATE_EPOCH应该设置为自该时期以来的秒数（以UTC为单位）。
+
+构建软件：
+======================
+
+构建U-Boot已在多个本机构建环境中进行了测试
+在许多不同的跨环境中 当然我们不能支持
+所有交叉开发工具的所有可能现有版本
+（可能已过时）版本。如果出现工具链问题，我们
+建议使用ELDK（请参阅http://www.denx.de/wiki/DULG/ELDK）
+它广泛用于构建和测试U-Boot。
+
+如果您未使用本机环境，则假定您
+在您的路径中有GNU交叉编译工具。在这种情况下，
+您必须在shell中设置环境变量CROSS_COMPILE。
+请注意，对Makefile或任何其他源文件的更改都不会
+必要。例如，在4xx CPU上使用ELDK，请输入：
+
+	$ CROSS_COMPILE = ppc_4xx-
+	$出口CROSS_COMPILE
+
+U-Boot旨在易于构建。安装后
+来源，您必须为一种特定的板类型配置U-Boot。这个
+通过键入以下内容来完成：
+
+	制作NAME_defconfig
+
+其中“ NAME_defconfig”是现有配置之一的名称-
+口粮；有关支持的名称，请参见configs / * _ defconfig。
+
+注意：对于某些板，可能存在特殊的配置名称；检查是否
+      董事会供应商可提供其他信息；对于
+      例如，TQM823L系统不带（标准）
+      或带有LCD支持。您可以选择其他“功能”
+      选择配置时，即
+
+      制作TQM823L_defconfig
+	-将配置为普通的TQM823L，即不支持LCD
+
+      制作TQM823L_LCD_defconfig
+	-将在LCD上配置带有U-Boot控制台的TQM823L
+
+      等等
+
+
+最后，键入“ make all”，然后您应该会得到一些可用的U引导程序
+准备下载到系统上/在系统上安装的映像：
+
+-“ u-boot.bin”是原始二进制映像
+-“ u-boot”是ELF二进制格式的图像
+-“ u-boot.srec”为Motorola S-Record格式
+
+默认情况下，构建是在本地执行的，并且对象已保存
+在源目录中。可以使用两种方法之一进行更改
+此行为并将U-Boot构建到某个外部目录：
+
+1.在make命令行调用中添加O =：
+
+	使O = / tmp / build distclean
+	使O = / tmp / build NAME_defconfig
+	使O = / tmp / build全部
+
+2.将环境变量KBUILD_OUTPUT设置为指向所需位置：
+
+	导出KBUILD_OUTPUT = / tmp / build
+	使distclean
+	制作NAME_defconfig
+	全部制作
+
+请注意，命令行“ O =“设置会覆盖KBUILD_OUTPUT环境
+变量。
+
+用户特定的CPPFLAGS，AFL​​AGS和CFLAGS可以通过以下方式传递给编译器：
+设置相应的环境变量KCPPFLAGS，KAFLAGS和KCFLAGS。
+例如，将所有编译器警告视为错误：
+
+	使KCFLAGS =-错误
+
+请注意，Makefiles假定您正在使用GNU make，因此
+例如在NetBSD上，您可能需要使用“ gmake”而不是
+本地“ make”。
+
+
+如果未列出系统板，则需要
+将U-Boot移植到您的硬件平台。为此，请遵循以下步骤
+脚步：
+
+1.创建一个新目录来保存您的主板代码。添加任何
+    您需要的文件。在您的板目录中，您至少需要
+    “ Makefile”和“ <board> .c”。
+2.为创建一个新的配置文件“ include / configs / <board> .h”
+    您的董事会。
+3.如果要将U-Boot移植到新的CPU，则还要创建一个新的
+    目录中包含您的CPU特定代码。添加您需要的任何文件。
+4.使用新名称运行“ make <board> _defconfig”。
+5.键入“ make”，您应该会得到一个有效的“ u-boot.srec”文件
+    安装在目标系统上。
+6.调试并解决可能出现的任何问题。
+    [当然，这最后一步比听起来要难得多。]
+
+
+测试U-Boot修改，新硬件的端口等：
+================================================== ============
+
+如果您修改了U-Boot来源（例如添加了一个新板）
+或支持新设备，新CPU等）
+向其他开发人员提供反馈。反馈通常需要
+“补丁”的形式，即与某个（最新
+U-Boot来源的官方或最新版本）。
+
+但是，在您提交此类补丁之前，请确认您的修改-
+阳离子没有破坏现有代码。至少确保*全部*
+受支持的主板无需任何编译器警告即可进行编译。为此，
+只需运行buildman脚本（tools / buildman / buildman），它将
+为所有支持的系统配置和构建U-Boot。警告，这个
+需要一段时间。请参阅buildman自述文件，或运行'buildman -H'
+用于文档。
+
+
+另请参见下面的“ U-Boot移植指南”。
+
+
+监视命令-概述：
+===========================
+
+go-在地址“ addr”处启动应用程序
+运行-在环境变量中运行命令
+bootm-从内存启动应用程序映像
+bootp-使用BootP / TFTP协议通过网络启动映像
+bootz-从内存启动zImage
+tftpboot-使用TFTP协议通过网络引导映像
+	       和环境变量“ ipaddr”和“ serverip”
+	       （最终是“ gatewayip”）
+tftpput-使用TFTP协议通过网络上传文件
+rarpboot-使用RARP / TFTP协议通过网络引导映像
+diskboot-从IDE devicebootd引导-引导默认值，即运行'bootcmd'
+加载-通过串行线加载S记录文件
+loadb-通过串行线加载二进制文件（kermit模式）
+md-内存显示
+mm-内存修改（自动递增）
+nm-内存修改（常量地址）
+MW-内存写入（填充）
+ms-内存搜索
+cp-内存副本
+cmp-内存比较
+crc32-校验和计算
+i2c-I2C子系统
+sspi-SPI实用程序命令
+基本-打印或设置地址偏移量
+printenv-打印环境变量
+setenv-设置环境变量
+saveenv-将环境变量保存到持久性存储中
+保护-启用或禁用FLASH写保护
+擦除-擦除闪存
+flinfo-打印闪存信息
+nand-NAND内存操作（请参阅doc / README.nand）
+bdinfo-打印板信息结构
+iminfo-打印应用程序映像的标题信息
+coninfo-打印控制台设备和信息
+ide-IDE子系统
+循环-地址范围上的无限循环
+loopw-地址范围上的无限写入循环
+mtest-简单的RAM测试
+icache-启用或禁用指令缓存
+dcache-启用或禁用数据缓存
+重置-执行CPU的重置
+echo-将args回显到控制台
+版本-打印监视器版本
+帮助-打印在线帮助
+？-'帮助'的别名
+
+
+监视命令-详细说明：
+=======================================
+
+去做。
+
+现在：只需键入“ help <command>”。
+
+
+环境变量：
+======================
+
+U-Boot支持使用环境变量进行用户配置，
+通过保存到闪存可以保持持久性。
+
+使用“ setenv”设置环境变量，使用
+“ printenv”，并使用“ saveenv”保存到Flash。使用“ setenv”
+没有值可用于从变量中删除变量
+环境。只要不保存环境，您就是
+使用内存副本。如果Flash区域包含
+环境被意外删除，提供了默认环境。
+
+可以使用环境变量设置某些配置选项。
+
+环境变量列表（很可能不完整）：
+
+  波特率-参见CONFIG_BAUDRATE
+
+  bootdelay-请参阅CONFIG_BOOTDELAY
+
+  bootcmd-请参阅CONFIG_BOOTCOMMAND
+
+  bootargs-引导RTOS映像时的引导参数
+
+  bootfile-要用TFTP加载的映像的名称
+
+  bootm_low-可以在bootm中进行图像处理的内存范围
+		  命令可以被限制。该变量为
+		  十六进制数并定义允许的最低地址
+		  由bootm命令使用。另请参阅“ bootm_size”
+		  环境变量。“ bootm_low”定义的地址是
+		  也是Linux初始内存映射的基础
+		  内核-请参阅CONFIG_SYS_BOOTMAPSZ的说明和
+		  bootm_mapsize。
+
+  bootm_mapsize-Linux内核的初始内存映射的大小。
+		  该变量以十六进制数形式给出
+		  定义从基数开始的存储区域的大小
+		  Linux内核可访问的地址bootm_low
+		  在早期启动期间。如果未设置，则使用CONFIG_SYS_BOOTMAPSZ
+		  如果已定义，则为默认值，并且bootm_size为
+		  否则使用。
+
+  bootm_size-可以在bootm中进行图像处理的内存范围
+		  命令可以被限制。该变量为
+		  十六进制数并定义区域的大小
+		  允许由bootm命令使用。另请参阅“ bootm_low”
+		  环境变量。
+
+  bootstopkeysha256，bootdelaykey，bootstopkey-请参阅README.autoboot
+
+  updatefile-使用TFTP服务器上的软件更新文件的位置
+		  通过自动软件更新功能。请参阅
+		  有关更多详细信息，请参阅doc / README.update中的文档。
+
+  自动加载-如果设置为“否”（以'n'开头的任何字符串），
+		  “ bootp”将仅加载执行查找
+		  从BOOTP服务器进行配置，但不要尝试
+		  使用TFTP加载任何图像
+
+  自动启动-如果设置为“是”，则是使用“ bootp”加载的映像，
+		  “ rarpboot”，“ tftpboot”或“ diskboot”命令将
+		  自动启动（通过内部调用
+		  “ bootm”）
+
+		  如果设置为“否”，则将一个独立的图像传递给
+		  “ bootm”命令将被复制到加载地址
+		  （最终未压缩），但无法启动。
+		  这可以用来加载和解压缩任意
+		  数据。
+
+  fdt_high-如果设置，则限制最大地址
+		  展平的设备树将在引导时复制到其中。
+		  例如，如果您的系统具有1 GB内存
+		  在物理地址0x10000000，而Linux内核
+		  仅将前704 MB识别为内存不足，您
+		  可能需要将fdt_high设置为0x3C000000才能具有
+		  将设备树Blob复制到最大地址
+		  704 MB的低内存，以便Linux内核可以
+		  在引导过程中访问它。
+
+		  如果将其设置为特殊值0xFFFFFFFF，则
+		  fdt不会在启动时完全复制。为了这
+		  要工作，它必须驻留在可写内存中，具有
+		  它的末尾有足够的填充空间，可用于u-boot
+		  将所需的信息添加到其中，并添加内存
+		  必须由内核访问。
+
+  fdtcontroladdr-如果设置，则为展平控件的地址
+		  当CONFIG_OF_CONTROL为时U-Boot使用的设备树
+		  定义。
+
+  i2cfast-（仅限PPC405GP | PPC405EP）
+		  如果设置为“ y”，则将Linux I2C驱动程序配置为快速
+		  模式（400kHZ）。此环境变量用于
+		  初始化代码。因此，为了使更改有效
+		  必须保存它，并且板子必须复位。
+
+  initrd_high-限制initrd图片的位置：
+		  如果未设置此变量，则initrd图像将是
+		  复制到RAM中可能的最高地址；这个
+		  通常是您想要的，因为它允许
+		  最大initrd大小。如果出于某种原因您想
+		  确保将initrd映像加载到
+		  CONFIG_SYS_BOOTMAPSZ限制，可以设置此环境
+		  变量的值为“ no”或“ off”或“ 0”。
+		  或者，您可以将其设置为最大上限
+		  要使用的地址（U-Boot仍会检查它
+		  不会覆盖U-Boot堆栈和数据）。
+
+		  例如，如果您的系统具有16 MB
+		  RAM，并希望保留4 MB以供Linux使用，
+		  您可以通过将“ mem = 12M”添加到
+		  “ bootargs”变量。但是，现在您必须
+		  确保将initrd图片放在第一个
+		  以及12 MB-这可以通过
+
+		  setenv initrd_high 00c00000
+
+		  如果将initrd_high设置为0xFFFFFFFF，这是一个
+		  向U-Boot指示所有地址均合法
+		  用于Linux内核，包括闪存中的地址
+		  记忆。在这种情况下，U-Boot将不会复制
+		  ramdisk。这可能有助于减少
+		  系统上的启动时间，但是要求
+		  Linux内核支持该功能。
+
+  ipaddr-IP地址；tftpboot命令需要
+
+  loadaddr-命令的默认加载地址，例如“ bootp”，
+		  “ rarpboot”，“ tftpboot”，“ loadb”或“ diskboot”
+
+  loads_echo-请参阅CONFIG_LOADS_ECHO
+
+  serverip-TFTP服务器IP地址；tftpboot命令需要
+
+  引导程序-请参阅CONFIG_BOOT_RETRY_TIME
+
+  bootdelaykey-请参阅CONFIG_AUTOBOOT_DELAY_STR
+
+  bootstopkey-请参阅CONFIG_AUTOBOOT_STOP_STR
+
+  ethprime-控制首先使用哪个接口。
+
+  ethact-控制当前处于活动状态的接口。
+		  例如，您可以执行以下操作
+
+		  =>环保FEC
+		  => ping 192.168.0.1＃在FEC上发送的流量
+		  => setenv ethact SCC
+		  => ping 10.0.0.1＃在SCC上发送的流量
+
+  ethrotate-设置为“ no”时，U-Boot不会全部通过
+		  可用的网络接口。
+		  它只是停留在当前选择的界面上。
+
+  netretry-设置为“ no”时，每个网络操作将
+		  不重试成功或失败。
+		  设置为“一次”时，网络操作将
+		  当所有可用的网络接口失败
+		  被尝试一次却没有成功。
+		  在控制重试操作的脚本上很有用
+		  他们自己。
+
+  npe_ucode-设置NPE微码的加载地址
+
+  silence_linux-如果设置，则将告知Linux通过以下方式静默启动：
+		  将控制台更改为空。如果是，它将是
+		  保持沉默。如果为“否”，则不会使其静音。如果
+		  取消设置，那么如果U-Boot控制台将使其静音
+		  保持沉默。
+
+  tftpsrcp-如果设置，则该值用于TFTP
+		  UDP源端口。
+
+  tftpdstp-如果设置，则该值用于TFTP的UDP
+		  目标端口，而不是“知名端口” 69。
+
+  tftpblocksize-用于TFTP传输的块大小；如果没有设置，
+		  我们使用TFTP服务器的默认块大小
+
+  tftptimeout-TFTP数据包的重传超时（以毫秒为单位）
+		  秒，最小值为1000 = 1秒）。定义
+		  当数据包被认为丢失时，它必须
+		  被转发。默认值为5000 = 5秒。
+		  降低此值可能使下载成功
+		  在丢包率较高的网络中速度更快，或者
+		  TFTP服务器不可靠。
+
+  tftptimeoutcountmax-TFTP超时的最大计数（否
+		  单位，最小值= 0）。定义超时时间
+		  可能在一次文件传输之前发生
+		  传输中止。默认值为10，0表示
+		  “不允许超时”。增大此值可能会有所帮助
+		  高丢包率或
+		  TFTP服务器或客户端硬件不可靠。
+
+  tftpwindowsize-如果设置，则该值用于TFTP
+		  窗口大小，如RFC 7440所述。
+		  这意味着我们之前可以收到的块数
+		  发送确认到服务器。
+
+  VLAN-设置为小于4095的值时
+		  以太网通过802.1q封装/接收
+		  VLAN标记的帧。
+
+  bootpretryperiod-BOOTP / DHCP发送重试的时间段。
+		  无符号值（以毫秒为单位）。如果未设置，则期限将
+		  可以是默认值（28000），也可以是基于
+		  CONFIG_NET_RETRY_COUNT（如果已定义）。该值具有
+		  优先于基于CONFIG_NET_RETRY_COUNT的值。
+
+  memmatches-最后一个“ ms”命令找到的匹配数，以十六进制表示
+
+  memaddr-由“ ms”命令找到的最后一个匹配项的地址，以十六进制表示，
+		  或0（如果没有）
+
+  mempos-通过“ ms”命令找到的最后一个匹配项的索引位置，
+		  以搜索大小（.b，.w，.l）为单位
+
+
+以下图像位置变量包含图像的位置
+用于引导。“图像”列给出了图像的作用，并且
+不是环境变量名称。其他列是环境
+变量名。“文件名”给出了TFTP上的文件名
+服务器，“ RAM地址”给出了图像在RAM中的位置
+加载到其中，“ Flash位置”在NOR中给出图像的地址
+闪存或NAND闪存中的偏移量。
+
+*注意*-不必为所有板定义这些变量，有些
+董事会目前将其他变量用于这些目的，其中一些
+董事会将这些变量用于其他目的。
+
+图像文件名RAM地址闪存位置
+----- --------- ----------- --------------
+u-boot u-boot u-boot_addr_r u-boot_addr
+Linux内核引导文件kernel_addr_r kernel_addr
+设备树blob fdtfile fdt_addr_r fdt_addr
+ramdisk ramdiskfile ramdisk_addr_r ramdisk_addr
+
+可以自动使用以下环境变量
+由网络启动命令（“ bootp”和“ rarpboot”）更新，
+取决于引导服务器提供的信息：
+
+  引导文件-见上文
+  dnsip-域名服务器的IP地址
+  dnsip2-辅助域名服务器的IP地址
+  gatewayip-要使用的网关（路由器）的IP地址
+  主机名-目标主机名
+  ipaddr-见上文
+  网络掩码-子网掩码
+  rootpath-NFS服务器上的根文件系统的路径名
+  serverip-参见上文
+
+
+有两个特殊的环境变量：
+
+  序列号-包含硬件标识信息，例如
+		  作为类型的字符串和/或序列号
+  ethaddr-以太网地址
+
+这些变量只能设置一次（通常在制造过程中
+董事会）。U-Boot拒绝删除或覆盖这些变量
+一旦设置了一次。
+
+
+其他特殊环境变量：
+
+  ver-包含已打印的U-Boot版本字符串
+		  使用“版本”命令。这个变量是
+		  只读（请参见CONFIG_VERSION_VARIABLE）。
+
+
+请注意，更改某些配置参数可能需要
+仅在下次启动后生效（是的，就像Windoze：-一样）。
+
+
+环境变量的回调函数：
+---------------------------------------------
+
+对于某些环境变量，需要更改u-boot的行为
+当它们的值改变时。此功能允许使用以下功能：
+与任意变量相关联。创建时，覆盖或
+删除，回调将提供一些机会
+发生效果或拒绝更改。
+
+回调使用以下命令命名并与函数关联
+您的电路板或驱动程序代码中的U_BOOT_ENV_CALLBACK宏。
+
+这些回调以两种方式之一与变量关联。的
+可以通过定义CONFIG_ENV_CALLBACK_LIST_STATIC来添加静态列表
+在板配置中为一个字符串，该字符串定义了
+协会。该列表必须采用以下格式：
+
+	条目=变量名[：回调名]
+	列表=条目[，列表]
+
+如果未指定回调名称，则删除该回调。
+列表中的任何地方都允许有空格。
+
+也可以通过定义“ .callbacks”变量来关联回调
+与上面的列表格式相同。“ .callbacks”中的任何关联都将
+覆盖静态列表中的任何关联。您可以定义
+CONFIG_ENV_CALLBACK_LIST_DEFAULT到列表（字符串）以定义
+默认或嵌入式环境中的“ .callbacks”环境变量。
+
+如果定义了CONFIG_REGEX，则上面的variable_name被评估为
+正则表达式。这允许将多个变量连接到
+相同的回调，而无需明确列出所有内容。
+
+回调函数的签名为：
+
+    int回调（const char * name，const char * value，枚举env_op op，int标志）
+
+*名称-更改的环境变量
+* value-环境变量的新值
+* op-操作（创建，覆盖或删除）
+*标志-环境变量的属性更改，请参见中的标志H_ *
+  包括/ search.h
+
+如果接受变量更改，则返回值为0，否则为1。
+
+命令行解析：
+=====================
+
+U-Boot提供了两种不同的命令行解析器：
+旧的“简单”外壳，以及功能更强大的“静默”外壳：
+
+旧的，简单的命令行解析器：
+--------------------------------
+
+-支持环境变量（通过setenv / saveenv命令）
+-一行上的多个命令，以';'分隔
+-使用“ ... $ {name} ...”语法的变量替换
+-特殊字符（'$'，';'）可以通过以'\'为前缀转义，
+  例如：
+	setenv bootcmd bootm \ $ {地址}
+-您还可以通过将单引号括起来来对文本进行转义，例如：
+	setenv addip'setenv bootargs $ bootargs ip = $ ipaddr：$ serverip：$ gatewayip：$ netmask：$ hostname :: off'
+
+安静的外壳：
+-----------
+
+-与Bourne外壳类似，具有类似的控制结构
+  如果...然后...其他... FI，因为...做了... 而...做了...
+  直到...完成...
+-支持环境（“全局”）变量（通过setenv / saveenv
+  命令）和本地Shell变量（通过标准Shell语法）
+  “名称=值”）; 只有环境变量可以与“ run”一起使用
+  命令
+
+通用规则：
+--------------
+
+（1）如果命令行（或“ run”执行的环境变量
+    命令）包含用分号分隔的几个命令，以及
+    这些命令之一失败，则其余命令将是
+    无论如何执行。
+
+（2）如果一次调用即可执行多个变量（即
+    调用运行时将变量列表作为参数），任何失败
+    命令将导致“运行”终止，即剩余
+    变量不执行。
+
+冗余以太网接口注意事项：
+=======================================
+
+有些主板带有冗余的以太网接口。U-Boot支持
+这样的配置，并能够自动选择
+需要时可以使用“工作”界面。MAC分配的工作方式如下：
+
+网络接口编号为eth0，eth1，eth2，...
+MAC地址可以在环境中存储为“ ethaddr”（=> eth0），
+“ eth1addr”（=> eth1），“ eth2addr”，...
+
+如果网络接口存储了一些有效的MAC地址（例如
+在SROM中），如果没有对应的地址，它将用作默认地址
+在环境中设置环境；如果对应的环境
+设置了变量，它将覆盖卡中的设置；这意味着：
+
+o如果SROM具有有效的MAC地址，并且SROM中没有地址
+  在环境中，将使用SROM的地址。
+
+o如果SROM中没有有效地址，则在SROM中没有定义
+  环境存在，那么环境变量的值是
+  用过的。
+
+o如果SROM和环境都包含MAC地址，并且
+  两个地址相同，使用此MAC地址。
+
+o如果SROM和环境都包含MAC地址，并且
+  地址不同，使用的是环境值，并且
+  警告已打印。
+
+o如果SROM或环境均不包含MAC地址，则发生错误
+  被提出。如果定义了CONFIG_NET_RANDOM_ETHADDR，则在这种情况下
+  使用随机的，本地分配的MAC。
+
+如果以太网驱动程序实现了“ write_hwaddr”功能，则有效的MAC地址
+将在初始化过程中被编程到硬件中。这个
+可以通过设置适当的'ethmacskip'环境变量来跳过。
+命名约定如下：
+“ ethmacskip”（=> eth0），“ eth1macskip”（=> eth1）等。
+
+图片格式：
+==============
+
+U-Boot能够启动（并在其上执行其他辅助操作）
+两种格式的图像：
+
+新的uImage格式（FIT）
+-----------------------
+
+基于扁平化图像树-FIT的灵活强大的格式
+展平设备树）。它允许使用多个图像
+组件（几个内核，ramdisk等），其内容受
+SHA1，MD5或CRC32。在doc / uImage.FIT目录中找到更多详细信息。
+
+
+旧的uImage格式
+-----------------
+
+旧图像格式基于二进制文件，基本上可以是任何文件，
+前面有一个特殊的标题；请参阅include / image.h中的定义以获取
+细节; 标题基本上定义了以下图像属性：
+
+*目标操作系统（针对OpenBSD，NetBSD，FreeBSD，
+  4.4BSD，Linux，SVR4，Esix，Solaris，Irix，SCO，Dell，NCR，VxWorks，
+  LynxOS，pSOS，QNX，RTEMS，完整性
+  当前受支持：Linux，NetBSD，VxWorks，QNX，RTEMS，LynxOS，
+  完整性）。
+*目标CPU架构（针对Alpha，ARM，Intel x86，
+  IA64，MIPS，NDS32，Nios II，PowerPC，IBM S390，SuperH，Sparc，Sparc 64位;
+  当前支持：ARM，Intel x86，MIPS，NDS32，Nios II，PowerPC）。
+*压缩类型（未压缩，gzip，bzip2）
+*加载地址
+* 入口点
+*图片名称
+*图像时间戳
+
+标头由特殊的魔术数字标记，两个标头
+并且图像的数据部分受到保护，以防止损坏
+CRC32校验和
+
+
+Linux支持：
+==============
+
+尽管U-Boot应该支持任何操作系统或独立应用程序
+轻松地，在设计
+U-Boot。
+
+U-Boot包含许多功能，到目前为止，这些功能已经成为某些功能的一部分
+Linux内核中的特殊“引导程序”代码。还有，任何
+要使用的“ initrd”映像不再是一个大型Linux映像的一部分；
+相反，内核和“ initrd”是单独的映像。这个实现
+有几个目的：
+
+-相同的功能可用于其他操作系统或独立运行
+  应用程序（例如：使用压缩图像来减少
+  闪存占用空间）
+
+-移植新的Linux内核版本变得更加容易，因为
+  U-Boot完成了许多底层的，与硬件相关的工作
+
+-现在可以将同一Linux内核映像与不同的“ initrd”一起使用
+  图片; 当然这也意味着不同的内核映像可以
+  用相同的“ initrd”运行。这使测试更加容易（您不必
+  您只需要构建一个新的“ zImage.initrd” Linux映像
+  在“ initrd”中更改文件）。此外，
+  现在，软件变得更加容易。
+
+
+Linux HOWTO：
+============
+
+将Linux移植到基于U-Boot的系统：
+---------------------------------------
+
+U-Boot无法使您免于进行所有必要的修改
+配置Linux设备驱动程序以与目标硬件一起使用
+（不，我们不打算提供完整的虚拟机接口来
+Linux :-)。
+
+但是现在您可以忽略所有引导加载程序代码（在arch / powerpc / mbxboot中）。
+
+只需确保您的计算机特定的头文件（例如
+include / asm-ppc / tqm8xx.h）包含与董事会相同的定义
+我们在include / asm- <arch> /u-boot.h中定义的信息结构，
+并确保您对IMAP_ADDR的定义使用相同的值
+作为CONFIG_SYS_IMMR中的U-Boot配置。
+
+请注意，U-Boot现在具有一个驱动程序模型，这是驱动程序的统一模型。
+如果要添加新的驱动程序，请将其放入驱动程序模型。如果有
+没有可用的uclass，建议您创建一个。看到
+doc / driver-model。
+
+
+配置Linux内核：
+-----------------------------
+
+对U-Boot没有特殊要求。确保你有根
+目标系统的设备（初始ramdisk，NFS）。
+
+
+构建Linux映像：
+-----------------------
+
+使用U-Boot，像“ zImage”或“ bzImage”这样的“常规”构建目标是
+未使用。如果您使用最新的内核源，则为新的构建目标
+将存在“ uImage”，该图像会自动构建可用于
+U-Boot。大多数较旧的内核还支持“ pImage”目标，
+它是为我们的前一个项目PPCBoot引入的，并使用了
+100％兼容格式。
+
+例：
+
+	制作TQM850L_defconfig
+	使oldconfig
+	做副
+	使uImage
+
+“ uImage”构建目标使用特殊工具（位于“ tools / mkimage”中）
+用标头信息封装压缩的Linux内核映像，
+与U-Boot一起使用的CRC32校验和等。这就是我们正在做的：
+
+*构建标准的“ vmlinux”内核映像（ELF二进制格式）：
+
+*将内核转换为原始二进制映像：
+
+	$ {CROSS_COMPILE} -objcopy -O二进制\
+				 -R .note -R .comment \
+				 -S vmlinux linux.bin
+
+*压缩二进制图像：
+
+	gzip -9 linux.bin
+
+*为U-Boot打包压缩的二进制映像：
+
+	mkimage -A ppc -O linux -T内核-C gzip \
+		-a 0 -e 0 -n“ Linux内核映像” \
+		-d linux.bin.gz uImage
+
+
+“ mkimage”工具还可用于创建虚拟磁盘映像以供使用
+使用U-Boot（与Linux内核映像分开），或
+合并为一个文件。“ mkimage”用64封装图像
+字节标头，其中包含有关目标体系结构的信息，
+操作系统，图像类型，压缩方法，入口点，时间
+标记，CRC32校验和等。
+
+可以通过两种方式调用“ mkimage”：验证现有图像和
+打印标题信息，或构建新图像。
+
+在第一种形式（带有“ -l”选项）中，mkimage列出了信息
+包含在现有U-Boot映像的标题中；这包括
+校验和验证：
+
+	工具/ mkimage -l图像
+	  -l ==>列出图像标题信息
+
+第二种形式（带有“ -d”选项）用于构建U-Boot映像
+来自用作图像有效载荷的“数据文件”：
+
+	工具/ mkimage -A拱-O os -T类型-C comp -a addr -e ep \
+		      -n名称-d data_file映像
+	  -A ==>将架构设置为“拱形”
+	  -O ==>设置操作系统为'os'
+	  -T ==>将图像类型设置为“类型”
+	  -C ==>设置压缩类型'comp'
+	  -a ==>将加载地址设置为“ addr”（十六进制）
+	  -e ==>将入口点设置为“ ep”（十六进制）
+	  -n ==>将图像名称设置为“名称”
+	  -d ==>使用“数据文件”中的图像数据
+
+现在，用于PowerPC系统的所有Linux内核都使用相同的负载
+地址（0x00000000），但入口点地址取决于
+内核版本：
+
+-2.2.x内核的入口点为0x0000000C，
+-2.3.x和更高版本的内核的入口点为0x00000000。
+
+因此，构建U-Boot映像的典型调用为：
+
+	->工具/ mkimage -n'TQM850L的2.4.4内核'\
+	> -A ppc -O linux -T内核-C gzip -a 0 -e 0 \
+	> -d /opt/elsk/ppc_8xx/usr/src/linux-2.4.4/arch/powerpc/coffboot/vmlinux.gz \
+	>示例/uImage.TQM850L
+	映像名称：TQM850L的2.4.4内核
+	创建于：2000年7月19日星期三02:34:59
+	映像类型：PowerPC Linux内核映像（gzip压缩）
+	数据大小：335725字节= 327.86 kB = 0.32 MB
+	加载地址：0x00000000
+	入口点：0x00000000
+
+要验证图像的内容（或检查是否损坏）：
+
+	->工具/ mkimage -l示例/ uImage.TQM850L
+	映像名称：TQM850L的2.4.4内核
+	创建于：2000年7月19日星期三02:34:59
+	映像类型：PowerPC Linux内核映像（gzip压缩）
+	数据大小：335725字节= 327.86 kB = 0.32 MB
+	加载地址：0x00000000
+	入口点：0x00000000
+
+注意：对于启动时间很关键的嵌入式系统，您可以进行交易
+加快内存速度并安装未压缩的映像：
+在Flash中需要更多空间，但由于它不需要
+需要解压缩：
+
+	-> gunzip /opt/elsk/ppc_8xx/usr/src/linux-2.4.4/arch/powerpc/coffboot/vmlinux.gz
+	->工具/ mkimage -n'TQM850L的2.4.4内核'\
+	> -A ppc -O linux -T内核-C无-a 0 -e 0 \
+	> -d /opt/elsk/ppc_8xx/usr/src/linux-2.4.4/arch/powerpc/coffboot/vmlinux \
+	>示例/uImage.TQM850L-未压缩
+	映像名称：TQM850L的2.4.4内核
+	创建于：2000年7月19日星期三02:34:59
+	映像类型：PowerPC Linux内核映像（未压缩）
+	数据大小：792160字节= 773.59 kB = 0.76 MB
+	加载地址：0x00000000
+	入口点：0x00000000
+
+
+类似地，您可以从“ ramdisk.image.gz”文件构建U-Boot映像。
+当您的内核打算使用初始虚拟磁盘时：
+
+	->工具/ mkimage -n'简单Ramdisk映像'\
+	> -A ppc -O linux -T ramdisk -C gzip \
+	> -d /LinuxPPC/images/SIMPLE-ramdisk.image.gz示例/ simple-initrd
+	映像名称：简单的Ramdisk映像
+	创建于：2000年1月12日星期三14:01:50
+	映像类型：PowerPC Linux RAMDisk映像（gzip压缩）
+	数据大小：566530字节= 553.25 kB = 0.54 MB
+	加载地址：0x00000000
+	入口点：0x00000000
+
+“ dumpimage”是用于分解由mkimage构建的图像的工具。它的“ -i”
+选项执行mkimage的第二种形式（“ -d”
+选项）。给定由mkimage构建的图像，dumpimage会提取“数据文件”
+从图片：
+
+	工具/转储图片-i图片-T类型-p位置data_file
+	  -i ==>从“图像”中提取特定的“数据文件”
+	  -T ==>将图像类型设置为“类型”
+	  -p ==>“图像”内“数据文件”的“位置”（从0开始）
+
+
+安装Linux映像：
+-------------------------
+
+要通过串行（控制台）界面下载U-Boot映像，
+您必须将图像转换为S记录格式：
+
+	objcopy -I binary -O srec示例/图像示例/image.srec
+
+'objcopy'不了解U-Boot中的信息
+图片标题，因此生成的S-Record文件将相对于
+地址0x00000000。要将其加载到给定地址，您需要
+将目标地址指定为带有“负载”的“偏移”参数
+命令。
+
+示例：将映像安装到地址0x40100000（位于
+TQM8xxL在第一个Flash bank中）：
+
+	=>擦除40100000 401FFFFF
+
+	.....完成
+	擦除了8个扇区
+
+	=>加载40100000
+	##准备下载S记录...
+	〜> examples / image.srec
+	1 2 3 4 5 6 7 8 9 10 11 12 13 ...
+	...
+	15989 15990 15991 15992
+	[文件传输完成]
+	[连接的]
+	##开始地址= 0x00000000
+
+
+您可以使用“ iminfo”命令检查下载是否成功；
+这包括校验和验证，因此您可以确定没有数据
+发生腐败：
+
+	=>伊米40100000
+
+	##检查图像40100000 ...
+	   映像名称：TQM850L上的initrd的2.2.13
+	   映像类型：PowerPC Linux内核映像（gzip压缩）
+	   数据大小：335725字节= 327 kB = 0 MB
+	   加载地址：00000000
+	   入口点：0000000c
+	   正在验证校验和...确定
+
+
+启动Linux：
+-----------
+
+“ bootm”命令用于引导存储在其中的应用程序
+内存（RAM或闪存）。如果是Linux内核映像，则内容
+“ bootargs”环境变量的值作为
+参数。您可以使用
+“ printenv”和“ setenv”命令：
+
+
+	=> printenv引导参数
+	bootargs = root = / dev / ram
+
+	=> setenv bootargs root = / dev / nfs rw nfsroot = 10.0.0.2：/ LinuxPPC nfsaddrs = 10.0.0.99：10.0.0.2
+
+	=> printenv引导参数
+	bootargs = root = / dev / nfs rw nfsroot = 10.0.0.2：/ LinuxPPC nfsaddrs = 10.0.0.99：10.0.0.2
+
+	=>展位40020000
+	##在40020000引导Linux内核...
+	   映像名称：2.2.13对于TQM850L上的NFS
+	   映像类型：PowerPC Linux内核映像（gzip压缩）
+	   数据大小：381681字节= 372 kB = 0 MB
+	   加载地址：00000000
+	   入口点：0000000c
+	   正在验证校验和...确定
+	   解压缩内核映像...确定
+	Linux版本2.2.13（wd@denx.local.net）（gcc版本2.95.2 19991024（发布））＃1 Wed Jul 19 02:35:17 MEST 2000
+	引导参数：root = / dev / nfs rw nfsroot = 10.0.0.2：/ LinuxPPC nfsaddrs = 10.0.0.99：10.0.0.2
+	time_init：递减频率= 187500000/60
+	校准延迟回路... 49.77 BogoMIPS
+	内存：15208k可用（700k内核代码，444k数据，32k init）[c0000000，c1000000]
+	...
+
+如果要使用初始RAM磁盘引导Linux内核，则可以通过
+内核和initrd映像的内存地址（PPBCOOT
+格式！）到“ bootm”命令：
+
+	=>伊米40100000 40200000
+
+	##检查图像40100000 ...
+	   映像名称：TQM850L上的initrd的2.2.13
+	   映像类型：PowerPC Linux内核映像（gzip压缩）
+	   数据大小：335725字节= 327 kB = 0 MB
+	   加载地址：00000000
+	   入口点：0000000c
+	   正在验证校验和...确定
+
+	##检查图像40200000 ...
+	   映像名称：简单的Ramdisk映像
+	   映像类型：PowerPC Linux RAMDisk映像（gzip压缩）
+	   数据大小：566530字节= 553 kB = 0 MB
+	   加载地址：00000000
+	   切入点：00000000
+	   正在验证校验和...确定
+
+	=>靴子40100000 40200000
+	##以40100000引导Linux内核...
+	   映像名称：TQM850L上的initrd的2.2.13
+	   映像类型：PowerPC Linux内核映像（gzip压缩）
+	   数据大小：335725字节= 327 kB = 0 MB
+	   加载地址：00000000
+	   入口点：0000000c
+	   正在验证校验和...确定
+	   解压缩内核映像...确定
+	##在40200000处加载RAMDisk映像...
+	   映像名称：简单的Ramdisk映像
+	   映像类型：PowerPC Linux RAMDisk映像（gzip压缩）
+	   数据大小：566530字节= 553 kB = 0 MB
+	   加载地址：00000000
+	   切入点：00000000
+	   正在验证校验和...确定
+	   正在加载Ramdisk ...确定
+	Linux版本2.2.13（wd@denx.local.net）（gcc版本2.95.2 19991024（发布））＃1 Wed Jul 19 02:32:08 MEST 2000
+	引导参数：root = / dev / ram
+	time_init：递减频率= 187500000/60
+	校准延迟回路... 49.77 BogoMIPS
+	...
+	RAMDISK：在块0找到压缩图像
+	VFS：已安装的根（ext2文件系统）。
+
+	bash＃
+
+启动Linux并传递一个平面设备树：
+-----------
+
+首先，必须使用适当的定义编译U-Boot。见本节
+上面标题为“ Linux Kernel Interface”的Linux进行了更深入的解释。的
+以下是如何启动内核并传递更新的示例
+平面设备树：
+
+=>打印oftaddr
+oftaddr = 0x300000
+=>打印经常
+oft = oftrees / mpc8540ads.dtb
+=> tftp $ oftaddr $ oft
+速度：1000，全双工
+使用TSEC0器件
+来自服务器192.168.1.1的TFTP; 我们的IP地址是192.168.1.101
+文件名“ oftrees / mpc8540ads.dtb”。
+加载地址：0x300000
+载入中：＃
+完成
+传输的字节数= 4106（十六进制100a）
+=> tftp $ loadaddr $启动文件
+速度：1000，全双工
+使用TSEC0器件
+来自服务器192.168.1.1的TFTP; 我们的IP地址是192.168.1.2
+文件名“ uImage”。
+加载地址：0x200000
+正在加载：#############
+完成
+传输的字节= 1029407（十六进制fb51f）
+=>打印loadaddr
+loadaddr = 200000
+=>打印oftaddr
+oftaddr = 0x300000
+=>引导$ loadaddr-$ oftaddr
+##正在启动映像00200000 ...
+   映像名称：Linux-2.6.17-dirty
+   映像类型：PowerPC Linux内核映像（gzip压缩）
+   数据大小：1029343字节= 1005.2 kB
+   加载地址：00000000
+   切入点：00000000
+   正在验证校验和...确定
+   解压缩内核映像...确定
+使用平面设备树在0x300000进行引导
+使用MPC85xx ADS的机器说明
+内存CAM映射：CAM0 = 256Mb，CAM1 = 256Mb，CAM2 = 0Mb残余：0Mb
+[片段]
+
+
+有关U引导映像类型的更多信息：
+------------------------------
+
+U-Boot支持以下图像类型：
+
+   “独立程序”可在环境中直接运行
+	由U-Boot提供；预期（如果他们表现良好
+	好）您可以从返回后继续在U-Boot工作
+	独立程序。
+   “ OS内核映像”通常是某些嵌入式OS的映像，其中
+	将完全接管控制权。通常这些程序
+	将安装自己的异常处理程序集，设备
+	驱动程序，设置MMU等-这意味着您无法
+	期望重新进入U-Boot，除非重置CPU。
+   “ RAMDisk映像”或多或少只是数据块，它们
+	参数（地址，大小）传递到操作系统内核
+	正在开始。
+   “多文件映像”包含多个映像，通常是一个操作系统
+	（Linux）内核映像以及一个或多个数据映像，例如
+	RAM磁盘。例如，当您想要
+	使用BOOTP等通过网络启动，
+	服务器仅提供一个图像文件，但您想获取
+	例如操作系统内核和RAMDisk映像。
+
+	“多文件图像”以图像尺寸列表开头，每个
+	网络中“ uint32_t”指定的图像大小（以字节为单位）
+	字节顺序。该列表以“（uint32_t）0”终止。
+	在终止0后立即跟随图像，一个
+	一个，全部在“ uint32_t”边界上对齐（大小四舍五入为
+	4字节的倍数）。
+
+   “固件映像”是包含固件的二进制映像（例如
+	U-Boot或FPGA映像），通常将其编程为
+	闪存。
+
+   “脚本文件”是将由以下命令执行的命令序列
+	U-Boot的命令解释器；这个功能特别重要
+	当您将U-Boot配置为使用实际shell时（安静）很有用
+	作为命令解释器。
+
+引导Linux zImage：
+-------------------------
+
+在某些平台上，可以启动Linux zImage。这个完成了
+使用“ bootz”命令。“ bootz”命令的语法相同
+作为“ bootm”命令的语法。
+
+注意，定义CONFIG_SUPPORT_RAW_INITRD允许用户提供
+带有原始initrd映像的内核。语法略有不同，
+initrd的地址必须增加其大小，如下所示
+格式：“ <initrd地址>：<initrd大小>”。
+
+
+独立的HOWTO：
+=================
+
+U-Boot的功能之一是您可以动态加载和
+运行“独立”应用程序，可以使用以下资源
+U-Boot，如控制台I / O功能或中断服务。
+
+来源中包含两个简单的示例：
+
+“ Hello World”演示：
+-------------------
+
+“ examples / hello_world.c”包含一个小的“ Hello World”演示
+应用; 当您构建U-Boot时，它会自动编译。
+它配置为在地址0x00040004上运行，因此您可以使用它
+像那样：
+
+	=>负载
+	##准备下载S记录...
+	〜> examples / hello_world.srec
+	1 2 3 4 5 6 7 8 9 10 11 ...
+	[文件传输完成]
+	[连接的]
+	##开始地址= 0x00040004
+
+	=>前往40004 Hello World！这是一个测验。
+	##从0x00040004启动应用程序...
+	你好，世界
+	argc = 7
+	argv [0] =“ 40004”
+	argv [1] =“你好”
+	argv [2] =“世界！”
+	argv [3] =“此”
+	argv [4] =“是”
+	argv [5] =“ a”
+	argv [6] =“测试”。
+	argv [7] =“ <NULL>”
+	按任意键退出...
+
+	##应用程序终止，rc = 0x0
+
+另一个示例，说明如何注册CPM中断
+带有U-Boot代码的处理程序可以在“ examples / timer.c”中找到。
+在此，将CPM计时器设置为每秒产生一次中断。
+中断服务程序很简单，只是打印一个“。”。
+角色，但这只是一个演示程序。该应用程序可以是
+由以下键控制：
+
+	？-打印当前值和CPM定时器寄存器
+	b-启用中断并启动计时器
+	e-停止计时器并禁用中断
+	q-退出申请
+
+	=>负载
+	##准备下载S记录...
+	〜>示例/timer.srec
+	1 2 3 4 5 6 7 8 9 10 11 ...
+	[文件传输完成]
+	[连接的]
+	##开始地址= 0x00040004
+
+	=>去40004
+	##从0x00040004启动应用程序...
+	计时器= 0xfff00980
+	使用计时器1
+	  tgcr @ 0xfff00980，tmr @ 0xfff00990，trr @ 0xfff00994，tcr @ 0xfff00998，tcn @ 0xfff0099c，ter @ 0xfff009b0
+
+打'b'：
+	[q，b，e，？]设置间隔1000000 us
+	启用计时器
+打'？'：
+	[q，b，e，？] ........
+	tgcr = 0x1，tmr = 0xff1c，trr = 0x3d09，tcr = 0x0，tcn = 0xef6，ter = 0x0
+打'？'：
+	[q，b，e，？]。
+	tgcr = 0x1，tmr = 0xff1c，trr = 0x3d09，tcr = 0x0，tcn = 0x2ad4，ter = 0x0
+打'？'：
+	[q，b，e，？]。
+	tgcr = 0x1，tmr = 0xff1c，trr = 0x3d09，tcr = 0x0，tcn = 0x1efc，ter = 0x0
+打'？'：
+	[q，b，e，？]。
+	tgcr = 0x1，tmr = 0xff1c，trr = 0x3d09，tcr = 0x0，tcn = 0x169d，ter = 0x0
+按下“ e”：
+	[q，b，e，？] ...停止计时器
+打'q'：
+	[q，b，e，？] ##应用程序终止，rc = 0x0
+
+
+Minicom警告：
+================
+
+随着时间的流逝，许多人在尝试使用
+用于串行下载的“ minicom”终端仿真程序。我（wd）
+认为minicom坏了，建议不要使用它。下
+Unix，我建议将C-Kermit用于一般用途（并且
+特别是用于kermit二进制协议下载（“ loadb”命令），以及
+使用“ cu”进行S-Record下载（“ loads”命令）。看到
+http://www.denx.de/wiki/view/DULG/SystemSetup#Section_4.3。
+为kermit寻求帮助。
+
+
+不过，如果您绝对要使用它，请尝试添加
+配置到“文件传输协议”部分：
+
+	   名称程序名称U / D FullScr IO红色。多
+	X kermit / usr / bin / kermit -i -l％l -s YU Y N N
+	是kermit / usr / bin / kermit -i -l％l -r ND Y N N
+
+
+NetBSD注意事项：
+=============
+
+从版本0.9.2开始，U-Boot均支持NetBSD作为主机
+（构建U-Boot）和目标系统（引导NetBSD / mpc8xx）。
+
+建筑需要一个交叉的环境；众所周知
+带有交叉powerpc-netbsd-1.3软件包的NetBSD / i386（您还将
+需要gmake，因为Makefile与BSD make不兼容）。
+请注意，cross-powerpc软件包不安装包含文件。
+尝试构建U-Boot将失败，因为<machine / ansi.h>是
+失踪。此文件必须手动安装和修补：
+
+	＃cd / usr / pkg / cross / powerpc-netbsd / include
+	＃mkdir powerpc
+	＃ln -s powerpc机
+	＃cp /usr/src/sys/arch/powerpc/include/ansi.h powerpc / ansi.h
+	＃$ {EDIT} powerpc / ansi.h ##必须删除__va_list，_BSD_VA_LIST
+
+由于本机之间不兼容，本机版本“不起作用”
+和U-Boot包含文件。
+
+引导假定引导的映像（的第一部分）是
+Stage-2加载程序，该加载程序依次加载然后调用内核
+正确。加载程序源将最终出现在NetBSD源中
+树（可能在sys / arc / mpc8xx / stand / u-boot_stage2 /中）; 在里面
+同时，请参见ftp://ftp.denx.de/pub/u-boot/ppcboot_stage2.tar.gz
+
+
+实施内部：
+========================
+
+以下内容并非旨在完整地描述每个
+实施细节。但是，这应该有助于了解
+U-Boot的内部运作方式，并使其更容易移植到自定义
+硬件。
+
+
+初始堆栈，全局数据：
+---------------------------
+
+由于U-Boot的存在，使得U-Boot的实施变得复杂
+开始耗尽ROM（闪存），通常无法访问
+系统RAM（因为尚未初始化内存控制器）。
+这意味着我们没有可写的数据或BSS段，而BSS
+未初始化为零。为了能够在C环境下工作
+根本，我们必须至少分配一个最小的堆栈。实作
+这些选项由使用的CPU定义和限制：一些CPU
+型号提供片上存储器（例如MPC8xx和
+MPC826x处理器），其他（部分）数据缓存可以是
+锁定为（mis-）用作内存等
+
+	克里斯·哈里南（Chris Hallinan）向
+	U-Boot邮件列表：
+
+	主题：RE：[U-Boot-Users] RE：关于存储库x的更多信息（无）？
+	来自：“克里斯·哈里南（Chris Hallinan）” <clh@net1plus.com>
+	日期：2003年2月10日，星期一16:43:46 -0500（MET：22：43）
+	...
+
+	纠正我，如果我错了，伙计们，但是我的理解方式
+	是这样的：使用DCACHE作为堆栈等的初始RAM不会
+	需要任何物理RAM来备份缓存。机灵
+	是缓存被用作临时存储
+	设置SDRAM控制器之前需要的存储。它的
+	超出此列表的范围无法解释详细信息，但是您
+	通过研究缓存体系结构可以看到它是如何工作的，并且
+	在体系结构和特定于处理器的手册中进行操作。
+
+	OCM是片上存储器，我相信405GP具有4K。它
+	是系统设计人员用作
+	SDRAM可用之前的初始堆栈/ RAM区域。要么
+	选项应该适合您。如果您的计算机使用CS 4，应该没问题
+	电路板设计师没有将其用于会
+	导致您在初次启动时感到悲伤！通常不是
+	用过的。
+
+	CONFIG_SYS_INIT_RAM_ADDR应该在不会干扰的地方
+	与您的处理器/主板/系统设计。默认值
+	您可以在以下任何最新的u-boot发行版中找到
+	peach.h应该为您工作。我将其设置为更大的值
+	比您的SDRAM模块。如果您有64MB SDRAM模块，请设置
+	高于400_0000。只要确保您的董事会没有资源
+	应该回复那个地址！该代码在
+	start.S已经有一段时间了，应该按原样工作
+	您得到正确的配置。
+
+	-克里斯·哈里南（Chris Hallinan）
+	DS4.COM，Inc.
+
+必须记住这一点，因为它会对C语言产生一些影响
+初始化程序的代码：
+
+*初始化的全局数据（数据段）是只读的。不要试
+  写。
+
+*不要使用任何未初始化的全局数据（或隐式初始化的）
+  完全是零数据-BSS段）-这是未定义的，初始化为-
+  稍后（在移至RAM时）执行zation。
+
+*堆栈空间非常有限。避免大数据缓冲区或类似的东西
+  那。
+
+仅将堆栈作为可写内存限制意味着我们无法使用
+普通的全局数据在代码之间共享信息。但它
+原来，U-Boot的实施可以大大
+通过使所有人都可以使用全局数据结构（gd_t）来简化
+职能。我们可以将指向此数据的指针作为_all_的参数传递
+功能，但这会使代码膨胀。相反，我们使用以下功能
+GCC编译器（全局寄存器变量）共享数据：
+将指向全局数据的指针（gd）放入寄存器中
+为此保留。
+
+当出于这种目的选择寄存器时，我们受到
+当前架构的相关（E）ABI规范，以及
+GCC的实施。
+
+对于PowerPC，以下寄存器具有特定用途：
+	R1：堆栈指针
+	R2：保留供系统使用
+	R3-R4：参数传递和返回值
+	R5-R10：参数传递
+	R13：小数据区域指针
+	R30：GOT指针
+	R31：帧指针
+
+	（U-Boot还将R12用作内部GOT指针。r12
+	是易失性寄存器，因此当
+	在asm和C之间来回移动）
+
+    ==> U-Boot将使用R2持有指向全局数据的指针
+
+    注意：在PPC上，我们可以使用静态初始化程序（因为
+    全局数据结构的地址在编译时已知），
+    但事实证明，保留寄存器会导致
+    较小的代码-尽管代码节省不那么大（在
+    整个U-Boot映像的所有板平均752字节，
+    624个文本+ 127个数据）。
+
+在ARM上，使用以下寄存器：
+
+	R0：函数自变量字/整数结果
+	R1-R3：函数自变量字
+	R9：特定于平台
+	R10：堆栈限制（仅在启用堆栈检查时使用）
+	R11：参数（框架）指针
+	R12：临时工作区
+	R13：堆栈指针
+	R14：链接寄存器
+	R15：程序计数器
+
+    ==> U-Boot将使用R9保留指向全局数据的指针
+
+    注意：在ARM上，仅支持R_ARM_RELATIVE重定位。
+
+在Nios II上，ABI记录在这里：
+	http://www.altera.com/literature/hb/nios2/n2cpu_nii51016.pdf
+
+    ==> U-Boot将使用gp持有指向全局数据的指针
+
+    注意：在Nios II上，我们为gcc提供了“ -G0”选项，并且不使用gp
+    访问小数据段，因此gp是免费的。
+
+在NDS32上，使用以下寄存器：
+
+	R0-R1：自变量/返回
+	R2-R5：参数
+	R15：汇编程序的临时寄存器
+	R16：蹦床注册
+	R28：帧指针（FP）
+	R29：全局指针（GP）
+	R30：链接寄存器（LP）
+	R31：堆栈指针（SP）
+	PC：程序计数器（PC）
+
+    ==> U-Boot将使用R10保留指向全局数据的指针
+
+注意：DECLARE_GLOBAL_DATA_PTR必须与文件全局范围一起使用，
+或当前版本的GCC可能会“过度”优化代码。
+
+在RISC-V上，使用以下寄存器：
+
+	x0：硬接线零（零）
+	x1：寄信人地址（ra）
+	x2：堆栈指针（sp）
+	x3：全局指针（gp）
+	x4：线程指针（tp）
+	x5：链接寄存器（t0）
+	x8：帧指针（fp）
+	x10-x11：参数/返回值（a0-1）
+	x12-x17：自变量（a2-7）
+	x28-31：临时（t3-6）
+	pc：程序计数器（pc）
+
+    ==> U-Boot将使用gp持有指向全局数据的指针
+
+内存管理：
+------------------
+
+U-Boot在系统状态下运行并使用物理地址，即
+MMU既不用于地址映射也不用于内存保护。
+
+使用内存将可用内存映射到固定地址
+控制器。在此过程中，每个
+内存类型（闪存，SDRAM，SRAM），即使它由多个
+物理存储库。
+
+U-Boot安装在第一个Flash bank的前128 kB中
+TQM8xxL模块，范围为0x40000000 ... 0x4001FFFF）。后
+引导并调整DRAM的大小并对其进行初始化，然后代码自行重定位
+到DRAM的高端。在U-Boot代码的下面，有一些
+内存保留供malloc（）使用[请参见CONFIG_SYS_MALLOC_LEN
+配置设置]。在此之下，全球董事会的结构
+放置信息数据，然后放置堆栈（向下增长）。
+
+此外，一些异常处理程序代码被复制到低8 kB
+DRAM（0x00000000 ... 0x00001FFF）
+
+因此，具有16 MB DRAM的典型内存配置看起来像
+这个：
+
+	0x0000 0000异常向量代码
+	      ：
+	0x0000 1FFF
+	0x0000 2000免费供应用程序使用
+	      ：
+	      ：
+
+	      ：
+	      ：
+	0x00FB FF20监视器堆栈（向下增长）
+	0x00FB FFAC板信息数据和全局数据的永久副本
+	0x00FC 0000 Malloc竞技场
+	      ：
+	0x00FD FFFF
+	0x00FE 0000 RAM监视器代码的副本
+	最终：LCD或视频帧缓冲
+	...最终：pRAM（受保护的RAM-重置后保持不变）
+	0x00FF FFFF [RAM结束]
+
+
+系统初始化：
+----------------------
+
+在重置配置中，U-Boot从重置入口点开始
+（在大多数PowerPC系统上，地址为0x00000100）。由于重置
+CS0＃的配置，这是板载闪存的镜像。
+为了能够重新映射内存，U-Boot随后跳至其链接地址。
+为了能够在C中实现初始化代码，一个（小！）
+初始堆栈在内部双端口RAM中设置（以防CPU
+提供类似功能），或在数据的锁定部分
+缓存。之后，U-Boot会初始化CPU内核，缓存和
+SIU。
+
+接下来，所有的（潜在的）可用存储体都使用
+初步映射。例如，我们将它们放在512 MB边界上
+（0x20000000的倍数：0x00000000和0x20000000上的SDRAM，闪存
+在0x40000000和0x60000000上，SRAM在0x80000000上）。那么UPM A是
+编程用于SDRAM访问。使用临时配置，
+运行简单的内存测试，以确定SDRAM的大小
+银行。
+
+如果有多个SDRAM银行，并且这些银行是
+不同的大小，最大的被首先映射。对于相等的大小，第一个
+bank（CS2＃）首先被映射。第一个映射始终用于地址
+0x00000000，之后立即创建任何其他库
+从0开始的连续内存。
+
+然后，监视器将自身安装在SDRAM区域的高端
+并分配内存供malloc（）和全球理事会使用
+信息数据；同样，异常向量代码被复制到低位RAM
+页，并设置最终堆栈。
+
+只有在此重定位之后，您才能拥有“正常”的C环境。
+直到您受到多种方式的限制，主要是因为您
+从ROM运行，并且因为必须将代码重定位到
+RAM中的新地址。
+
+
+U-Boot移植指南：
+----------------------
+
+[基于U-Boot-Users邮件中Jerry Van Baren的消息
+列表，2002年10月]
+
+
+int main（int argc，char * argv []）
+{
+	sighandler_t no_more_time;
+
+	信号（SIGALRM，no_more_time）;
+	警报（PROJECT_DEADLINE-toSec（3 * WEEK））;
+
+	如果（available_money> available_manpower）{
+		支付顾问给U-Boot；
+		返回0;
+	}
+
+	下载最新的U-Boot源码；
+
+	订阅u-boot邮件列表；
+
+	如果（无知）
+		电子邮件（“嗨，我是U-Boot的新手，如何开始？”）；
+
+	同时（学习）{
+		阅读顶层目录中的自述文件；
+		阅读http://www.denx.de/twiki/bin/view/DULG/Manual；
+		阅读适用的文档/自述文件。*;
+		阅读资料，路加福音；
+		/* 找 。名称“ *。[chS]” | xargs grep -i <关键字> * /
+	}
+
+	如果（available_money> toLocalCurrency（$ 2500））
+		买BDI3000;
+	其他
+		增加很多麻烦和时间；
+
+	如果（存在类似的委员会）{/ *希望... * /
+		cp -a板/ <类似>板/ <myboard>
+		cp include / configs / <相似> .h include / configs / <myboard> .h
+	}其他{
+		创建自己的电路板支持子目录；
+		创建您自己的板include / configs / <myboard> .h文件；
+	}
+	编辑新的board / <myboard>文件
+	编辑新的include / configs / <myboard> .h
+
+	同时（！接受）{
+		在跑步的时候） {
+			做{
+				添加/修改源代码；
+			}直到（编译）；
+			调试；
+			如果（无知）
+				电子邮件（“嗨，我有问题...”）；
+		}
+		将补丁文件发送到U-Boot电子邮件列表；
+		如果（合理的批评）
+			结合电子邮件列表代码审核中的改进；
+		其他
+			保护书面代码；
+	}
+
+	返回0;
+}
+
+无效no_more_time（int sig）
+{
+      hire_a_guru（）;
+}
+
+
+编码标准：
+-----------------
+
+对U-Boot的所有贡献均应符合Linux内核
+编码风格；请参阅以下网址的内核编码样式指南：
+https://www.kernel.org/doc/html/latest/process/coding-style.html和
+Linux内核源目录中的脚本“ scripts / Lindent”。
+
+源于其他项目的源文件（例如
+MTD子系统）通常不受这些准则的约束，
+重新格式化以简化后续向这些版本的较新版本的迁移
+资料来源。
+
+请注意，U-Boot是用C实现的（并且在
+汇编器）; 没有使用C ++，所以请不要使用C ++样式注释（//）
+在您的代码中。
+
+另请遵循以下格式规则：
+-删除任何尾随的空白
+-使用TAB字符进行缩进和垂直对齐，而不是空格
+-确保不要使用DOS'\ r \ n'换行符
+-请勿在源文件中添加超过2个连续的空行
+-不要将尾随空行添加到源文件
+
+不符合标准的提交内容可能会被退回
+并要求重新格式化更改。
+
+
+提交补丁：
+-------------------
+
+由于用于U-Boot的补丁数量在增加，因此我们需要
+建立一些规则。不符合这些规则的提交
+即使其中包含重要且有价值的内容，也可能会被拒绝。
+有关详细信息，
+请参见http://www.denx.de/wiki/U-Boot/Patches。
+
+补丁应发送到u-boot邮件列表<u-boot@lists.denx.de>;
+参见https://lists.denx.de/listinfo/u-boot
+
+发送补丁时，请在以下信息中包含
+它：
+
+*有关错误修复：错误的描述以及补丁的修复方式
+  这个错误。请尝试包含一种方法来证明
+  补丁实际上可以修复某些问题。
+
+*对于新功能：功能说明和您的
+  实施。
+
+*对于主要贡献，请在其中添加MAINTAINERS文件
+  信息以及相关的文件和目录引用。
+
+*添加对新主板的支持时，请不要忘记添加一个
+  维护者的电子邮件地址也指向boards.cfg文件。
+
+*如果您的补丁添加了新的配置选项，请不要忘记
+  将它们记录在README文件中。
+
+*补丁本身。如果您使用的是git（*强烈*
+  推荐），您可以使用
+  “ git format-patch”。如果您随后使用“ git send-email”将其发送到
+  在U-Boot邮件列表中，您将避免大多数常见问题
+  与其他一些邮件客户端。
+
+  如果您不能使用git，请使用“ diff -purN OLD NEW”。如果您的版本
+  diff不支持这些选项，则获取最新版本的
+  GNU差异
+
+  运行此命令时，当前目录应为父目录
+  U-Boot源代码树的目录（即，请确保
+  您的补丁程序包含足够的目录信息
+  受影响的文件）。
+
+  我们更喜欢将修补程序作为纯文本。不鼓励使用MIME附件，
+  并且不得使用压缩附件。
+
+*如果一组逻辑修改影响或创建了多个
+  文件，所有这些更改应在单个补丁文件中提交。
+
+*包含不同，无关的修改的变更集应为
+  作为单独的补丁提交，每个变更集一个补丁。
+
+
+笔记：
+
+*在发送补丁之前，请在补丁上运行buildman脚本
+  源代码树，并确保未报告任何错误或警告
+  对于任何董事会。
+
+*将您的修改保持在必要的最低限度：补丁程序
+  包含几个无关的更改或任意重新格式化
+  返回并要求重新格式化/拆分它。
+
+*如果您修改现有代码，请确保您的新代码没有
+  增加代码的内存占用量；-)小就是美丽！
+  在添加新功能时，这些功能只能有条件地编译
+  （使用#ifdef），以及带有新功能的结果代码
+  没有您的用户，已禁用的用户必须不需要比旧代码更多的内存
+  修改。
+
+*请记住，每封邮件的大小限制为100 kB
+  u-boot邮件列表。较大的补丁程序将被审核。如果他们是
+  合理且不会太大，他们将被认可。但是补丁
+  应避免大于大小限制。
